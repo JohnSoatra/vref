@@ -1,10 +1,12 @@
-export type OnChange = (changes: {
+export type ChangeEvent = {
   target: any;
   action: string | symbol;
   key: any;
   value: any;
   prevValue: any;
-}) => void;
+}
+
+export type OnChange = (event: ChangeEvent) => void;
 
 export type Ref<T> = {
   value: T;
