@@ -1,13 +1,13 @@
 {
-  "name": "ref.js",
-  "version": "0.0.1",
+  "name": "vref",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "John Soatra",
   "description": "A Javascript library for reactive state management.",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/JohnSoatra/ref.js"
+    "url": "https://github.com/JohnSoatra/vref"
   },
   "main": "dist/index.cjs.cjs",
   "module": "dist/index.esm.js",
