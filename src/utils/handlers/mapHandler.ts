@@ -45,7 +45,7 @@ export default function mapHandler(
       newValue = prevValue;
     }
 
-    if (!(newKey === prevKey && newValue === prevValue)) {
+    if (!(Object.is(prevKey, newKey) && Object.is(prevValue, newValue))) {
       shallow.delete(prevKey);
       shallow.set(newKey, newValue);
     }

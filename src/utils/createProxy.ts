@@ -93,7 +93,7 @@ export default function createProxy<T extends Record<string, any>>(
     set(target, key, newValue, receiver) {
       const currentValue = target[key];
 
-      if (currentValue !== newValue) {
+      if (Object.is(currentValue, newValue)) {
         const prevValue = proxy[key];
         const result = Reflect.set(target, key, newValue, receiver);
 
