@@ -7,8 +7,11 @@ import { Changes, OnChangeHandler, Ref } from './types/ref';
 /**
  * Creates a reactive reference object.
  *
- * The returned object has a `value` property that is reactive. Any changes
- * to `value` or nested objects/arrays will trigger the `onchange` callback if provided.
+ * The returned object has:
+ * - `value`: the reactive value. Any changes to this value or nested objects/arrays will
+ *   trigger the `onchange` callback if provided.
+ * - `onchange`: optional callback that is called whenever the value changes. It can be
+ *   reassigned later to change or reset the callback.
  *
  * Example usage:
  * ```ts
@@ -20,7 +23,7 @@ import { Changes, OnChangeHandler, Ref } from './types/ref';
  *
  * @param initial The initial value of the reactive reference.
  * @param onchange Optional callback that is called whenever the value changes.
- * @returns A reactive reference object of type `Ref<T>`.
+ * @returns A reactive reference object of type `Ref<T>` with `.value` and `.onchange`.
  */
 function ref<T>(initial: T, onchange?: OnChangeHandler): Ref<T>;
 function ref<T = undefined>(): Ref<T | undefined>;
