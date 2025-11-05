@@ -21,7 +21,8 @@ export default function createProxy<T extends Record<string, any>>(
 ) {
   if (isProxy(content)) {
     return content;
-  } else if (cacheProxy.has(content)) {
+  }
+  if (cacheProxy.has(content)) {
     return cacheProxy.get(content);
   }
 
