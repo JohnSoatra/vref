@@ -11,8 +11,7 @@ export default function iteratorHandler(
   cacheShallow: CacheShallow,
   onChange: OnChangeHandler,
 ): Iterator<any> & Iterable<any> {
-  const iteratorFun: Function = target[key].bind(target);
-  const iterator = iteratorFun() as Iterator<any>;
+  const iterator = target[key]() as Iterator<any>;
 
   return {
     next(value?: any) {

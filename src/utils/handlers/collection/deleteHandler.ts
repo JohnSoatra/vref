@@ -4,7 +4,7 @@ import { OnChangeHandler } from "../../../types/ref";
 export default function deleteHandler(
   proxy: any,
   target: Map<any, any> | Set<any> | WeakMap<any, any> | WeakSet<any>,
-  key: object,
+  key: any,
   onChange: OnChangeHandler,
 ) {
   const rawKey = tryToGetRaw(key);

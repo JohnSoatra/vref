@@ -1,16 +1,27 @@
-import { forbiddenKey, isArray, isProxy, mutationMethod } from "./utils";
-import Symbols from "../constants/symbols";
 import Keys from "../constants/keys";
-import arrayHandler from "./handlers/arrayHandler";
-import mapHandler from "./handlers/mapHandler";
-import setHandler from "./handlers/setHandler";
-import mutationHandler from "./handlers/mutationHandler";
+import Symbols from "../constants/symbols";
+import IterationArrayMethods from "../constants/iterationMethods/array";
+import IterationTypedArrayMethods from "../constants/iterationMethods/typeArray";
+import IterationMapMethods from "../constants/iterationMethods/map";
+import IterationSetMethods from "../constants/iterationMethods/set";
+import IteratorMethods from "../constants/iteratorMethods";
+import LookupArrayMethods from "../constants/lookupMethods/array";
+import LookupTypedArrayMethods from "../constants/lookupMethods/typedArray";
+import MutationArrayMethods from "../constants/mutationMethods/array";
+import MutationTypedArrayMethods from "../constants/mutationMethods/typedArray";
+import lookupArrayHandler from "./handlers/array/lookupHandler";
+import mutationArrayHandler from "./handlers/array/mutateHandler";
+import iterationHandler from "./handlers/iterationHandler";
+import iteratorHandler from "./handlers/iteratorHandler";
+import addHandler from "./handlers/collection/addHandler";
+import deleteHandler from "./handlers/collection/deleteHandler";
 import getHandler from "./handlers/collection/getHandler";
 import hasHandler from "./handlers/collection/hasHandler";
-import deleteHandler from "./handlers/collection/deleteHandler";
+import setHandler from "./handlers/collection/setHandler";
 import defaultHandler from "./handlers/defaultHandler";
-import { OnChangeHandler } from "../types/ref";
+import { forbiddenKey, isArray, isProxy, isTypedArray } from "./utils";
 import { CacheProxy, CacheShallow } from "../types/createProxy";
+import { OnChangeHandler } from "../types/ref";
 
 export default function createProxy<T extends Record<string, any>>(
   content: T,
@@ -27,7 +38,7 @@ export default function createProxy<T extends Record<string, any>>(
   }
 
   const proxy = new Proxy(content, {
-    get(target: any, key, receiver) {
+    get(target: any, key: any, receiver) {
       if (forbiddenKey(key)) {
         return undefined;
       }
@@ -57,42 +68,86 @@ export default function createProxy<T extends Record<string, any>>(
         if (isArray(value) || typeof value === 'object') {
           return createProxy(value, cacheProxy, cacheShallow, onChange);
         }
-        if (key === Keys.Get && value instanceof WeakMap) {
-          return function (getKey: any) {
-            return getHandler(target, getKey, cacheProxy, cacheShallow, onChange);
-          }
-        } else if (
-          key === Keys.Has &&
-          (value instanceof WeakMap || value instanceof WeakSet)
+        if (
+          (Array.isArray(target) && LookupArrayMethods.includes(key)) ||
+          (isTypedArray(target) && LookupTypedArrayMethods.includes(key))
         ) {
-          return function (hasKey: any) {
-            return hasHandler(target, hasKey, cacheProxy, cacheShallow, onChange);
-          }
-        } else if (
-          key === Keys.Delete &&
-          (value instanceof WeakMap || value instanceof WeakSet)
-        ) {
-          return function (deleteKey: any) {
-            return deleteHandler(proxy, target, deleteKey, cacheProxy, cacheShallow, onChange);
-          }
-        } else if (typeof key === 'string' && mutationMethod(target, key)) {
           return function (...args: any[]) {
-            return mutationHandler(proxy, target, key, cacheProxy, cacheShallow, onChange, ...args);
+            return lookupArrayHandler(target, key, ...args);
+          }
+        }
+        if (
+          (Array.isArray(target) && MutationArrayMethods.includes(key)) ||
+          (isTypedArray(target) && MutationTypedArrayMethods.includes(key))
+        ) {
+          return function (...args: any[]) {
+            return mutationArrayHandler(proxy, target, key, onChange, ...args);
+          }
+        }
+        if ((target instanceof Set || target instanceof WeakSet) && key === Keys.Add) {
+          return function (addValue: any) {
+            return addHandler(proxy, target, addValue, onChange);
+          }
+        }
+        if (
+          target instanceof Map || target instanceof Set ||
+          target instanceof WeakMap || target instanceof WeakSet
+        ) {
+          if (key === Keys.Delete) {
+            return function (deleteKey: any) {
+              return deleteHandler(proxy, target, deleteKey, onChange);
+            }
+          }
+          if (key === Keys.Has) {
+            return function (hasKey: any) {
+              return hasHandler(target, hasKey);
+            }
+          }
+        }
+        if (target instanceof Map || target instanceof WeakMap) {
+          if (key === Keys.Get) {
+            return function (getKey: any) {
+              return getHandler(target, getKey, cacheProxy, cacheShallow, onChange);
+            }
+          }
+          if (key === Keys.Set) {
+            return function (setKey: any, setValue: any) {
+              return setHandler(proxy, target, setKey, setValue, onChange);
+            }
+          }
+        }
+        if (
+          (Array.isArray(target) && IterationArrayMethods.includes(key)) ||
+          (isTypedArray(target) && IterationTypedArrayMethods.includes(key)) ||
+          (target instanceof Map && IterationMapMethods.includes(key)) ||
+          (target instanceof Set && IterationSetMethods.includes(key))
+        ) {
+          return function (...args: any[]) {
+            return iterationHandler(target, key, cacheProxy, cacheShallow, onChange, ...args);
+          }
+        }
+        if (
+          (isArray(target) || target instanceof Map || target instanceof Set) &&
+          IteratorMethods.includes(key)
+        ) {
+          return function () {
+            return iteratorHandler(target, key, cacheProxy, cacheShallow, onChange);
           }
         }
         return function (...args: any[]) {
-          const result = value.call(target, ...args);
-          return result === target ? proxy : target;
+          return defaultHandler(proxy, target, key, ...args);
         }
       }
       return value;
     },
     set(target, key, newValue, receiver) {
-      if (typeof key === 'string' && Keys.ForbiddenKeys.includes(key)) return true;
-      const currentValue = target[key];
+      if (forbiddenKey(key)) {
+        return true;
+      }
 
-      if (!Object.is(currentValue, newValue)) {
-        const prevValue = proxy[key];
+      const prevValue = target[key];
+
+      if (!Object.is(prevValue, newValue)) {
         const result = Reflect.set(target, key, newValue, receiver);
 
         onChange({
@@ -100,7 +155,7 @@ export default function createProxy<T extends Record<string, any>>(
           action: 'set',
           key,
           value: newValue,
-          prevValue: prevValue,
+          prevValue,
         });
 
         return result;
@@ -108,11 +163,14 @@ export default function createProxy<T extends Record<string, any>>(
       return true;
     },
     deleteProperty(target, key) {
-      if (typeof key === 'string' && Keys.ForbiddenKeys.includes(key)) return true;
+      if (forbiddenKey(key)) {
+        return true;
+      }
+
       const hasKey = Object.prototype.hasOwnProperty.call(target, key);
 
       if (hasKey) {
-        const prevValue = proxy[key];
+        const prevValue = target[key];
         const result = Reflect.deleteProperty(target, key);
 
         onChange({
@@ -120,7 +178,7 @@ export default function createProxy<T extends Record<string, any>>(
           action: 'delete',
           key,
           value: undefined,
-          prevValue: prevValue
+          prevValue
         });
 
         return result;

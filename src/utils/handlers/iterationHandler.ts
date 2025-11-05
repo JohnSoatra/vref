@@ -24,8 +24,8 @@ export default function iterationHandler<T extends any[] | TypedArray | Map<any,
   onChange: OnChangeHandler,
   ...args: any[]
 ) {
-  function callback(this: any, ...args: any[]) {
-    const proxiedArgs = args.map(arg => tryToCreateProxy(arg, cacheProxy, cacheShallow, onChange, false));
+  function callback(this: any, ..._args: any[]) {
+    const proxiedArgs = _args.map(arg => tryToCreateProxy(arg, cacheProxy, cacheShallow, onChange));
     return args[0].apply(this, proxiedArgs);
   }
   return (target as any)[key](callback, ...args);

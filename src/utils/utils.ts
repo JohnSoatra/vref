@@ -1,8 +1,6 @@
 import createProxy from "./createProxy";
-import Symbols from "../constants/symbols";
-import { OnChangeHandler } from "../types/ref";
-import { CacheProxy, CacheShallow } from "../types/createProxy";
 import Keys from "../constants/keys";
+import Symbols from "../constants/symbols";
 
 export function creatable(value: any) {
   return typeof value === 'object' && value !== null;
@@ -12,49 +10,20 @@ export function isArray(value: any): boolean {
   return Array.isArray(value) || (ArrayBuffer.isView(value) && !(value instanceof DataView));
 }
 
+export function isTypedArray(value: any) {
+  return ArrayBuffer.isView(value) && !(value instanceof DataView);
+}
+
 export function isProxy(value: object): boolean {
   return (value as any)[Symbols.IsProxy] ?? false;
 }
 
-export function getRaw(proxy: any): object | undefined {
-  return proxy[Symbols.RawObject];
+export function getRaw(proxy: object): object | undefined {
+  return (proxy as any)[Symbols.RawObject];
 }
 
 export function forbiddenKey(key: string | symbol) {
   return typeof key === 'string' && Keys.ForbiddenKeys.includes(key);
-}
-// export function mutationMethod(obj: object, key: string) {
-//   const list = MutationMethods.get(Object.getPrototypeOf(obj).constructor);
-//   return list ? list.includes(key) : false;
-// }
-
-export function toProxies(
-  cacheProxy: CacheProxy,
-  cacheShallow: CacheShallow,
-  onChange: OnChangeHandler,
-  ...args: any[]
-) {
-  let array: any[] = [];
-
-  for (const each of args) {
-    let result;
-
-    if (creatable(each)) {
-      if (isProxy(each)) {
-        result = each;
-      } else if (cacheProxy.has(each)) {
-        result = cacheProxy.get(each);
-      } else {
-        result = createProxy(each, cacheProxy, cacheShallow, onChange, false);
-      }
-    } else {
-      result = each;
-    }
-
-    array.push(result);
-  }
-
-  return array;
 }
 
 export function shallowArray<T>(value: T): T {
@@ -83,6 +52,7 @@ export function nextFrame(callback: () => void) {
     setImmediate(callback);
   }
 }
+
 export function getNow() {
   if (typeof performance !== 'undefined') {
     return performance.now();

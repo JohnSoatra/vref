@@ -1,14 +1,14 @@
 import { tryToCreateProxy, tryToGetRaw } from "../../utils";
-import { OnChangeHandler } from "../../../types/ref";
 import { CacheProxy, CacheShallow } from "../../../types/createProxy";
+import { OnChangeHandler } from "../../../types/ref";
 
 export default function getHandler(
-  value: Map<any, any> | WeakMap<any, any>,
-  key: object,
+  target: Map<any, any> | WeakMap<any, any>,
+  key: any,
   cacheProxy: CacheProxy,
   cacheShallow: CacheShallow,
   onChange: OnChangeHandler,
 ) {
-  const result = value.get(tryToGetRaw(key));
+  const result = target.get(tryToGetRaw(key));
   return tryToCreateProxy(result, cacheProxy, cacheShallow, onChange);
 }

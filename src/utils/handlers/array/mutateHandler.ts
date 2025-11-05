@@ -3,14 +3,14 @@ import MutationTypedArrayMethods from "../../../constants/mutationMethods/typedA
 import { TypedArray } from "../../../types/types";
 import { OnChangeHandler } from "../../../types/ref";
 
-type MutateKey<T> = T extends any[] ?
+type MutationKey<T> = T extends any[] ?
   typeof MutationArrayMethods[number] :
   typeof MutationTypedArrayMethods[number];
 
 function mutationArrayHandler<T extends any[] | TypedArray>(
   proxy: any,
   target: T,
-  key: MutateKey<T>,
+  key: MutationKey<T>,
   onChange: OnChangeHandler,
   ...args: any[]
 ): any {

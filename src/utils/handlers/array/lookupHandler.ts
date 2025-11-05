@@ -12,7 +12,7 @@ function lookupArrayHandler<T extends any[] | TypedArray>(
   key: LookupKey<T>,
   ...args: any[]
 ) {
-  return (target as any)[key].call(target, tryToGetRaw(args[0]), ...args.slice(1));
+  return target[key](tryToGetRaw(args[0]), ...args.slice(1));
 }
 
 export default lookupArrayHandler;

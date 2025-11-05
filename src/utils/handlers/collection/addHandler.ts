@@ -15,7 +15,7 @@ export default function addHandler(
     onChange({
       target: proxy,
       action: 'add',
-      key: undefined,
+      key: value,
       value,
       prevValue: undefined,
     });
