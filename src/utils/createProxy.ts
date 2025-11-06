@@ -11,7 +11,8 @@ import {
   isIteratorMethod,
   isLookupMethod,
   isMutationMethod,
-  isForbiddenKey
+  isForbiddenKey,
+  isProducerMethod
 } from "./utils";
 import { CacheProxy, CacheShallow } from "../types/createProxy";
 import { OnChangeHandler } from "../types/ref";
@@ -46,15 +47,20 @@ export default function createProxy<T extends Record<string, any>>(
       ) {
         if (isArray(value) || typeof value === 'object') return createProxy(value, cacheProxy, cacheShallow, onChange);
         const handlers = packHandlers(proxy, target, key, cacheProxy, cacheShallow, onChange);
-        if (isIteratorMethod(target, key)) return handlers.iteratorHandler;
-        if (isIterationMethod(target, key)) return handlers.iterationHandler;
-        if (isLookupMethod(target, key)) return handlers.lookupArrayHandler;
         if (isMutationMethod(target, key)) return handlers.mutationArrayHandler;
-        if (key === Keys.Get && isMapCollection(target)) return handlers.getHandler
-        if (key === Keys.Set && isMapCollection(target)) return handlers.setHandler;
-        if (key === Keys.Add && isSetCollection(target)) return handlers.addHandler;
-        if (key === Keys.Has && isCollection(target)) return handlers.hasHandler;
-        if (key === Keys.Delete && isCollection(target)) return handlers.deleteHandler;
+        if (isProducerMethod(target, key)) return handlers.producerArrayHandler;
+        if (isIterationMethod(target, key)) return handlers.iterationHandler;
+        if (isIteratorMethod(target, key)) return handlers.iteratorHandler;
+        if (isLookupMethod(target, key)) return handlers.lookupArrayHandler;
+        if (isMapCollection(target)) {
+          if (key === Keys.Get) return handlers.getHandler;
+          if (key === Keys.Set) return handlers.setHandler;
+        }
+        if (isSetCollection(target) && key === Keys.Add) return handlers.addHandler;
+        if (isCollection(target)) {
+          if (key === Keys.Has) return handlers.hasHandler;
+          if (key === Keys.Delete) return handlers.deleteHandler;
+        }
         return handlers.defaultHandler;
       }
       return value;

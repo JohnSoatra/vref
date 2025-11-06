@@ -6,7 +6,7 @@ import { OnChangeHandler } from "../../types/ref";
 
 export default function iteratorHandler(
   target: any[] | TypedArray | Map<any, any> | Set<any>,
-  key: typeof IteratorMethods[0],
+  key: typeof IteratorMethods[number],
   cacheProxy: CacheProxy,
   cacheShallow: CacheShallow,
   onChange: OnChangeHandler,

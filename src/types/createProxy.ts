@@ -1,2 +1,2 @@
-export type CacheProxy = WeakMap<object, any>;
-export type CacheShallow = WeakMap<object, any>;
+export type CacheProxy = WeakMap<object, object>;
+export type CacheShallow = WeakMap<object, object>;

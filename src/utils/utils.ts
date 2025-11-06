@@ -2,15 +2,14 @@ import createProxy from "./createProxy";
 import Keys from "../constants/keys";
 import Symbols from "../constants/symbols";
 import IterationArrayMethods from "../constants/iterationMethods/array";
-import IterationTypedArrayMethods from "../constants/iterationMethods/typeArray";
 import IterationMapMethods from "../constants/iterationMethods/map";
 import IterationSetMethods from "../constants/iterationMethods/set";
 import IteratorMethods from "../constants/iteratorMethods";
 import LookupArrayMethods from "../constants/lookupMethods/array";
-import LookupTypedArrayMethods from "../constants/lookupMethods/typedArray";
 import MutationArrayMethods from "../constants/mutationMethods/array";
 import MutationTypedArrayMethods from "../constants/mutationMethods/typedArray";
 import { OnChangeHandler, RefOptions } from "../types/ref";
+import ProducerArrayMethods from "../constants/producerMethods/array";
 
 export function isForbiddenKey(key: any) {
   return Keys.ForbiddenKeys.includes(key);
@@ -47,7 +46,6 @@ export function isCollection(target: object) {
 export function isIterationMethod(target: object, key: any) {
   return (
     (Array.isArray(target) && IterationArrayMethods.includes(key)) ||
-    (isTypedArray(target) && IterationTypedArrayMethods.includes(key)) ||
     (target instanceof Map && IterationMapMethods.includes(key)) ||
     (target instanceof Set && IterationSetMethods.includes(key))
   );
@@ -61,10 +59,7 @@ export function isIteratorMethod(target: object, key: any) {
 }
 
 export function isLookupMethod(target: object, key: any) {
-  return (
-    (Array.isArray(target) && LookupArrayMethods.includes(key)) ||
-    (isTypedArray(target) && LookupTypedArrayMethods.includes(key))
-  );
+  return Array.isArray(target) && LookupArrayMethods.includes(key);
 }
 
 export function isMutationMethod(target: object, key: any) {
@@ -72,6 +67,10 @@ export function isMutationMethod(target: object, key: any) {
     (Array.isArray(target) && MutationArrayMethods.includes(key)) ||
     (isTypedArray(target) && MutationTypedArrayMethods.includes(key))
   );
+}
+
+export function isProducerMethod(target: object, key: any) {
+  return Array.isArray(target) && ProducerArrayMethods.includes(key);
 }
 
 export function getRaw(proxy: object): object | undefined {

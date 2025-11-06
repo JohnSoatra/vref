@@ -8,6 +8,7 @@ import setHandler from "./handlers/collection/setHandler";
 import defaultHandler from "./handlers/defaultHandler";
 import iterationHandler from "./handlers/iterationHandler";
 import iteratorHandler from "./handlers/iteratorHandler";
+import producerArrayHandler from "./handlers/array/producerHandler";
 import { CacheProxy, CacheShallow } from "../types/createProxy";
 import { OnChangeHandler } from "../types/ref";
 
@@ -24,6 +25,7 @@ export default function packHandlers(
     iterationHandler: (...args: any[]) => iterationHandler(target, key, cacheProxy, cacheShallow, onChange, ...args),
     lookupArrayHandler: (...args: any[]) => lookupArrayHandler(target, key, ...args),
     mutationArrayHandler: (...args: any[]) => mutationArrayHandler(proxy, target, key, onChange, ...args),
+    producerArrayHandler: (...args: any[]) => producerArrayHandler(target, key, cacheProxy, cacheShallow, onChange, ...args),
     getHandler: (getKey: any) => getHandler(target, getKey, cacheProxy, cacheShallow, onChange),
     setHandler: (setKey: any, setValue: any) => setHandler(proxy, target, setKey, setValue, onChange),
     addHandler: (addValue: any) => addHandler(proxy, target, addValue, onChange),

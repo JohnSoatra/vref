@@ -1,15 +1,9 @@
 import LookupArrayMethods from "../../../constants/lookupMethods/array";
-import LookupTypedArrayMethods from "../../../constants/lookupMethods/typedArray";
 import { getRawTry } from "../../utils";
-import { TypedArray } from "../../../types/types";
 
-type LookupKey<T> = T extends any[] ?
-  typeof LookupArrayMethods[number] :
-  typeof LookupTypedArrayMethods[number];
-
-function lookupArrayHandler<T extends any[] | TypedArray>(
-  target: T,
-  key: LookupKey<T>,
+function lookupArrayHandler(
+  target: any[],
+  key: typeof LookupArrayMethods[number],
   ...args: any[]
 ) {
   return target[key](getRawTry(args[0]), ...args.slice(1));
