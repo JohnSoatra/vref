@@ -3,7 +3,7 @@ import IterationMapMethods from "../../constants/iterationMethods/map";
 import IterationSetMethods from "../../constants/iterationMethods/set";
 import { createProxyTry } from "../utils";
 import { TypedArray } from "../../types/types";
-import { CacheProxy, CacheShallow } from "../../types/createProxy";
+import { CacheProxy } from "../../types/createProxy";
 import { OnChangeHandler } from "../../types/ref";
 
 type IterationKey<T> =
@@ -16,14 +16,13 @@ type IterationKey<T> =
 export default function iterationHandler<T extends any[] | TypedArray | Map<any, any> | Set<any>>(
   target: T,
   key: IterationKey<T>,
-  cacheProxy: CacheProxy,
-  cacheShallow: CacheShallow,
+  cache: CacheProxy,
   onChange: OnChangeHandler,
   ...args: any[]
 ) {
   const [callbackFn, ...restArgs] = args;
   function callback(this: any, ...callbackArgs: any[]) {
-    const proxiedArgs = callbackArgs.map(arg => createProxyTry(arg, cacheProxy, cacheShallow, onChange));
+    const proxiedArgs = callbackArgs.map(arg => createProxyTry(arg, cache, onChange));
     return callbackFn.apply(this, proxiedArgs);
   }
   return (target as any)[key](callback, ...restArgs);

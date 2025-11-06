@@ -1,13 +1,12 @@
 import { createProxyTry, getRawTry } from "../../utils";
-import { CacheProxy, CacheShallow } from "../../../types/createProxy";
+import { CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";
 
 export default function getHandler(
   target: Map<any, any> | WeakMap<any, any>,
   key: any,
-  cacheProxy: CacheProxy,
-  cacheShallow: CacheShallow,
+  cache: CacheProxy,
   onChange: OnChangeHandler,
 ) {
-  return createProxyTry(target.get(getRawTry(key)), cacheProxy, cacheShallow, onChange);
+  return createProxyTry(target.get(getRawTry(key)), cache, onChange);
 }

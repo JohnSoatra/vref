@@ -33,19 +33,13 @@ function ref<T>(initial: T, options?: RefOptions): Ref<T>;
 function ref<T = undefined>(): Ref<T | undefined>;
 function ref<T>(initial?: T, onchangeOrOptions?: OnChangeHandler | RefOptions): Ref<T | undefined> {
   const options = createOptions(onchangeOrOptions);
-  const cacheProxy = new WeakMap();
-  const cacheShallow = new WeakMap();
+  const cache = new WeakMap();
   const ticks: Ticks = {
     latest: getNow(),
     tick: 0,
     scheduled: false,
   }
-  return createProxy(
-    { value: initial },
-    cacheProxy,
-    cacheShallow,
-    (event) => handleChange(event, ticks, options),
-  );
+  return createProxy({ value: initial }, cache, (event) => handleChange(event, ticks, options));
 }
 
 export default ref;

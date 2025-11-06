@@ -12,23 +12,23 @@ import {
   isLookupMethod,
   isMutationMethod,
   isForbiddenKey,
-  isProducerMethod
+  isProducerMethod,
+  deleteCacheTry
 } from "./utils";
-import { CacheProxy, CacheShallow } from "../types/createProxy";
+import { CacheProxy } from "../types/createProxy";
 import { OnChangeHandler } from "../types/ref";
 
 export default function createProxy<T extends Record<string, any>>(
   content: T,
-  cacheProxy: CacheProxy,
-  cacheShallow: CacheShallow,
+  cache: CacheProxy,
   onChange: OnChangeHandler,
   saveProxy?: boolean,
 ) {
   if (isProxy(content)) {
     return content;
   }
-  if (cacheProxy.has(content)) {
-    return cacheProxy.get(content);
+  if (cache.has(content)) {
+    return cache.get(content);
   }
   const proxy = new Proxy(content, {
     get(target: any, key, receiver) {
@@ -45,8 +45,8 @@ export default function createProxy<T extends Record<string, any>>(
           typeof value === 'function'
         )
       ) {
-        if (isArray(value) || typeof value === 'object') return createProxy(value, cacheProxy, cacheShallow, onChange);
-        const handlers = packHandlers(proxy, target, key, cacheProxy, cacheShallow, onChange);
+        if (isArray(value) || typeof value === 'object') return createProxy(value, cache, onChange);
+        const handlers = packHandlers(proxy, target, key, cache, onChange);
         if (isMutationMethod(target, key)) return handlers.mutationArrayHandler;
         if (isProducerMethod(target, key)) return handlers.producerArrayHandler;
         if (isIterationMethod(target, key)) return handlers.iterationHandler;
@@ -70,13 +70,16 @@ export default function createProxy<T extends Record<string, any>>(
       const prevValue = target[key];
       if (!Object.is(prevValue, newValue)) {
         const result = Reflect.set(target, key, newValue, receiver);
-        onChange({
-          target: proxy,
-          action: 'set',
-          key,
-          value: newValue,
-          prevValue,
-        });
+        if (result) {
+          deleteCacheTry(prevValue, cache);
+          onChange({
+            target: proxy,
+            action: 'set',
+            key,
+            value: newValue,
+            prevValue,
+          });
+        }
         return result;
       };
       return true;
@@ -87,20 +90,23 @@ export default function createProxy<T extends Record<string, any>>(
       if (hasKey) {
         const prevValue = target[key];
         const result = Reflect.deleteProperty(target, key);
-        onChange({
-          target: proxy,
-          action: 'delete',
-          key,
-          value: undefined,
-          prevValue
-        });
+        if (result) {
+          deleteCacheTry(prevValue, cache);
+          onChange({
+            target: proxy,
+            action: 'delete',
+            key,
+            value: undefined,
+            prevValue
+          });
+        }
         return result;
       };
       return true;
     }
   });
   if (saveProxy ?? true) {
-    cacheProxy.set(content, proxy);
+    cache.set(content, proxy);
   }
   return proxy;
 }

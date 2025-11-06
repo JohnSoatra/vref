@@ -1,14 +1,13 @@
 import IteratorMethods from "../../constants/iteratorMethods";
 import { createProxyTry } from "../utils";
 import { TypedArray } from "../../types/types";
-import { CacheProxy, CacheShallow } from "../../types/createProxy";
+import { CacheProxy } from "../../types/createProxy";
 import { OnChangeHandler } from "../../types/ref";
 
 export default function iteratorHandler(
   target: any[] | TypedArray | Map<any, any> | Set<any>,
   key: typeof IteratorMethods[number],
-  cacheProxy: CacheProxy,
-  cacheShallow: CacheShallow,
+  cache: CacheProxy,
   onChange: OnChangeHandler,
 ): Iterator<any> & Iterable<any> {
   const iterator = target[key]() as Iterator<any>;
@@ -16,7 +15,7 @@ export default function iteratorHandler(
     next(value?: any) {
       const result = iterator.next(value);
       if (!result.done) {
-        result.value = createProxyTry(result.value, cacheProxy, cacheShallow, onChange);
+        result.value = createProxyTry(result.value, cache, onChange);
       }
       return result;
     },

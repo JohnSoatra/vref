@@ -8,8 +8,9 @@ import IteratorMethods from "../constants/iteratorMethods";
 import LookupArrayMethods from "../constants/lookupMethods/array";
 import MutationArrayMethods from "../constants/mutationMethods/array";
 import MutationTypedArrayMethods from "../constants/mutationMethods/typedArray";
-import { OnChangeHandler, RefOptions } from "../types/ref";
 import ProducerArrayMethods from "../constants/producerMethods/array";
+import { CacheProxy } from "../types/createProxy";
+import { OnChangeHandler, RefOptions } from "../types/ref";
 
 export function isForbiddenKey(key: any) {
   return Keys.ForbiddenKeys.includes(key);
@@ -126,4 +127,10 @@ export function createOptions(onchangeOrOptions: OnChangeHandler | RefOptions | 
     }
   }
   return options;
+}
+
+export function deleteCacheTry(value: any, cache: CacheProxy) {
+  if (isCreatable(value)) {
+    cache.delete(value);
+  }
 }
