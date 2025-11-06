@@ -31,7 +31,7 @@ export default function createProxy<T extends Record<string, any>>(
   }
   const proxy = new Proxy(content, {
     get(target: any, key, receiver) {
-      if (key === Symbols.IsProxy) return true
+      if (key === Symbols.IsProxy) return true;
       if (key === Symbols.RawObject) return content;
       let value: any;
       try { value = Reflect.get(target, key, receiver); }

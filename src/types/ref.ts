@@ -16,8 +16,29 @@ export type ChangeEvent = {
 
 /**
  * Callback called whenever a Ref's value changes.
+ *
+ * Receives a ChangeEvent containing details about the change.
  */
 export type OnChangeHandler = (event: ChangeEvent) => void;
+
+/**
+ * Options for configuring a reactive Ref.
+ */
+export type RefOptions = {
+  /**
+   * Maximum number of updates allowed in a single tick (1–300).
+   * Prevents infinite or excessive updates.
+   */
+  maxTick?: number;
+  /**
+   * Message to display or log when `maxTick` is exceeded.
+   */
+  maxTickMessage?: string;
+  /**
+   * Optional callback that is triggered whenever the Ref's value changes.
+   */
+  onchange?: OnChangeHandler;
+};
 
 /**
  * A reactive reference object.
@@ -26,18 +47,20 @@ export type OnChangeHandler = (event: ChangeEvent) => void;
  */
 export type Ref<T> = {
   /**
-   * The reactive value. Reading or updating `.value` will trigger
-   * the `onchange` callback if provided.
+   * The reactive value of type T.
+   * Reading or updating `.value` will trigger the `onchange` callback if provided.
    */
   value: T;
-  /**
-   * Optional callback triggered when `.value` changes.
-   */
-  onchange: OnChangeHandler | undefined;
 };
 
-export type Changes = {
-  latest: number;
+/**
+ * Tracks the internal tick state of a Ref.
+ */
+export type Ticks = {
+  /** Current tick count. */
   tick: number;
+  /** Timestamp of the latest update. */
+  latest: number;
+  /** Whether an update is currently scheduled. */
   scheduled: boolean;
-}
+};

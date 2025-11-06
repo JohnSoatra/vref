@@ -1,35 +1,44 @@
 import Max from "../constants/max";
-import { Changes, OnChangeHandler, ChangeEvent } from "../types/ref";
 import { getNow, nextFrame } from "./utils";
+import { Ticks, ChangeEvent, RefOptions } from "../types/ref";
 
+function maxTick(options: RefOptions) {
+  return (
+    options.maxTick && (options.maxTick > 0 && options.maxTick <= Max.LimitTick) ?
+      options.maxTick :
+      Max.Tick
+  );
+}
+function maxTickMessage(options: RefOptions) {
+  return (
+    options.maxTickMessage ||
+    `[vref] Maximum update limit reached (${maxTick(options)} per frame). ` +
+    `This may indicate a reactive loop or excessive nested updates. ` +
+    `Consider optimizing your state mutations or throttling updates.`
+  );
+}
 export default function handleChange(
-  changes: Changes,
-  onChange: OnChangeHandler | undefined,
-  props: ChangeEvent,
+  event: ChangeEvent,
+  ticks: Ticks,
+  options: RefOptions,
 ) {
-  if (onChange) {
+  if (options.onchange) {
     const now = getNow();
-
-    if (now - changes.latest > 16) {
-      changes.tick = 0;
-      changes.latest = now;
-    } else if (changes.tick >= Max.UpdateTick) {
-      console.warn(
-        `[vref] Maximum update limit reached (${Max.UpdateTick} per frame). ` +
-        `This may indicate a reactive loop or excessive nested updates. ` +
-        `Consider optimizing your state mutations or throttling updates.`
-      );
+    if (now - ticks.latest > 16) {
+      ticks.tick = 0;
+      ticks.latest = now;
+    } else if (ticks.tick >= maxTick(options)) {
+      console.warn(maxTickMessage(options));
     } else {
-      changes.tick += 1;
-      changes.latest = now;
+      ticks.tick += 1;
+      ticks.latest = now;
     }
-
-    if (!changes.scheduled) {
-      changes.scheduled = true;
+    if (!ticks.scheduled) {
+      ticks.scheduled = true;
       nextFrame(() => {
-        changes.scheduled = false;
+        ticks.scheduled = false;
         try {
-          onChange?.(props);
+          options.onchange?.(event);
         } catch (error) {
           console.error('[vref] onchange error:', error);
         }

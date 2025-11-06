@@ -10,9 +10,10 @@ import LookupArrayMethods from "../constants/lookupMethods/array";
 import LookupTypedArrayMethods from "../constants/lookupMethods/typedArray";
 import MutationArrayMethods from "../constants/mutationMethods/array";
 import MutationTypedArrayMethods from "../constants/mutationMethods/typedArray";
+import { OnChangeHandler, RefOptions } from "../types/ref";
 
-export function isForbiddenKey(key: string | symbol) {
-  return typeof key === 'string' && Keys.ForbiddenKeys.includes(key);
+export function isForbiddenKey(key: any) {
+  return Keys.ForbiddenKeys.includes(key);
 }
 
 export function isCreatable(value: any) {
@@ -77,16 +78,6 @@ export function getRaw(proxy: object): object | undefined {
   return (proxy as any)[Symbols.RawObject];
 }
 
-export function shallowArray<T>(value: T): T {
-  if (Array.isArray(value)) {
-    return [...value] as T;
-  }
-  if (ArrayBuffer.isView(value) && !(value instanceof DataView)) {
-    return new (value.constructor as any)(value) as T;
-  }
-  return value;
-}
-
 export function getWeakValue(target: WeakMap<any, any> | WeakSet<any>, key: any) {
   if (target instanceof WeakMap) {
     return target.get(key);
@@ -124,4 +115,16 @@ export function createProxyTry(...args: Parameters<typeof createProxy>) {
     return createProxy(...args);
   }
   return value;
+}
+
+export function createOptions(onchangeOrOptions: OnChangeHandler | RefOptions | undefined) {
+  let options: RefOptions = {}
+  if (onchangeOrOptions) {
+    if (typeof onchangeOrOptions === 'function') {
+      options.onchange = onchangeOrOptions;
+    } else {
+      options = onchangeOrOptions;
+    }
+  }
+  return options;
 }

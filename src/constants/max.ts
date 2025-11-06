@@ -1,5 +1,6 @@
 const Max = {
-  UpdateTick: 100,
+  Tick: 100,
+  LimitTick: 300,
 } as const;
 
 export default Max;
