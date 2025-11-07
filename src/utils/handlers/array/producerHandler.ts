@@ -1,4 +1,4 @@
-import ProducerArrayMethods from "../../../constants/producerMethods/array";
+import ProducerArrayMethods from "../../../constants/array";
 import { createProxyTry, getRawTry } from "../../utils";
 import { CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";

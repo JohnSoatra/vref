@@ -20,11 +20,11 @@ export default function packHandlers(
   onChange: OnChangeHandler,
 ) {
   return {
-    iteratorHandler: () => iteratorHandler(target, key, cache, onChange),
-    iterationHandler: (...args: any[]) => iterationHandler(target, key, cache, onChange, ...args),
-    lookupArrayHandler: (...args: any[]) => lookupArrayHandler(target, key, ...args),
     mutationArrayHandler: (...args: any[]) => mutationArrayHandler(proxy, target, key, onChange, ...args),
     producerArrayHandler: (...args: any[]) => producerArrayHandler(target, key, cache, onChange, ...args),
+    iterationHandler: (...args: any[]) => iterationHandler(target, key, cache, onChange, ...args),
+    iteratorHandler: () => iteratorHandler(target, key, cache, onChange),
+    lookupArrayHandler: (...args: any[]) => lookupArrayHandler(target, key, ...args),
     getHandler: (getKey: any) => getHandler(target, getKey, cache, onChange),
     setHandler: (setKey: any, setValue: any) => setHandler(proxy, target, setKey, setValue, cache, onChange),
     addHandler: (addValue: any) => addHandler(proxy, target, addValue, onChange),

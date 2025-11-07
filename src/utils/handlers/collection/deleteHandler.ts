@@ -1,4 +1,4 @@
-import { getWeakValue, getRawTry, deleteCacheTry, isMapCollection } from "../../utils";
+import { getWeakValue, getRawTry, removeCacheTry, isMapCollection } from "../../utils";
 import { CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";
 
@@ -13,9 +13,9 @@ export default function deleteHandler(
   const prevValue = getWeakValue(target, rawKey);
   const deleted = target.delete(rawKey);
   if (deleted) {
-    deleteCacheTry(rawKey, cache);
+    removeCacheTry(rawKey, cache);
     if (isMapCollection(target)) {
-      deleteCacheTry(prevValue, cache);
+      removeCacheTry(prevValue, cache);
     }
     onChange({
       target: proxy,

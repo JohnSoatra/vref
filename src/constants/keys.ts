@@ -4,6 +4,8 @@ const Keys = {
   Add: 'add',
   Has: 'has',
   Delete: 'delete',
+  Sort: 'sort',
+  Splice: 'splice',
   OnChange: 'onchange',
   ForbiddenKeys: ['__proto__', 'constructor', 'prototype'],
 } as const;

@@ -8,7 +8,7 @@ import IteratorMethods from "../constants/iteratorMethods";
 import LookupArrayMethods from "../constants/lookupMethods/array";
 import MutationArrayMethods from "../constants/mutationMethods/array";
 import MutationTypedArrayMethods from "../constants/mutationMethods/typedArray";
-import ProducerArrayMethods from "../constants/producerMethods/array";
+import ProducerArrayMethods from "../constants/array";
 import { CacheProxy } from "../types/createProxy";
 import { OnChangeHandler, RefOptions } from "../types/ref";
 
@@ -20,12 +20,12 @@ export function isCreatable(value: any) {
   return typeof value === 'object' && value !== null;
 }
 
-export function isArray(value: any): boolean {
-  return Array.isArray(value) || (ArrayBuffer.isView(value) && !(value instanceof DataView));
-}
-
 export function isTypedArray(value: any) {
   return ArrayBuffer.isView(value) && !(value instanceof DataView);
+}
+
+export function isArray(value: any): boolean {
+  return Array.isArray(value) || isTypedArray(value);
 }
 
 export function isProxy(value: object): boolean {
@@ -129,7 +129,7 @@ export function createOptions(onchangeOrOptions: OnChangeHandler | RefOptions | 
   return options;
 }
 
-export function deleteCacheTry(value: any, cache: CacheProxy) {
+export function removeCacheTry(value: any, cache: CacheProxy) {
   if (isCreatable(value)) {
     cache.delete(value);
   }

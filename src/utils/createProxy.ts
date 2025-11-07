@@ -13,7 +13,7 @@ import {
   isMutationMethod,
   isForbiddenKey,
   isProducerMethod,
-  deleteCacheTry
+  removeCacheTry
 } from "./utils";
 import { CacheProxy } from "../types/createProxy";
 import { OnChangeHandler } from "../types/ref";
@@ -71,7 +71,7 @@ export default function createProxy<T extends Record<string, any>>(
       if (!Object.is(prevValue, newValue)) {
         const result = Reflect.set(target, key, newValue, receiver);
         if (result) {
-          deleteCacheTry(prevValue, cache);
+          removeCacheTry(prevValue, cache);
           onChange({
             target: proxy,
             action: 'set',
@@ -91,7 +91,7 @@ export default function createProxy<T extends Record<string, any>>(
         const prevValue = target[key];
         const result = Reflect.deleteProperty(target, key);
         if (result) {
-          deleteCacheTry(prevValue, cache);
+          removeCacheTry(prevValue, cache);
           onChange({
             target: proxy,
             action: 'delete',

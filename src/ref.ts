@@ -1,7 +1,7 @@
 import createProxy from './utils/createProxy';
 import handleChange from './utils/handleChange';
 import { getNow, createOptions } from './utils/utils';
-import { Ticks, OnChangeHandler, Ref, RefOptions } from './types/ref';
+import { Ticks, OnChangeHandler, Ref, RefOptions, ChangeEvent } from './types/ref';
 
 /**
  * Creates a reactive reference object.
@@ -9,8 +9,7 @@ import { Ticks, OnChangeHandler, Ref, RefOptions } from './types/ref';
  * The returned object has:
  * - `value`: the reactive value of type `T`. Any changes to this value or nested objects/arrays
  *   will trigger the `onchange` callback if provided.
- * - `onchange`: optional callback that is called whenever the value changes. It can be
- *   reassigned later to change or reset the callback.
+ * - `onchange`: optional callback that is called whenever the value changes.
  * - `options`: optional configuration for the reference, including:
  *   - `maxTick`: maximum number of updates allowed in a single tick (1–300).
  *   - `maxTickMessage`: message to display or log when `maxTick` is exceeded.
@@ -39,7 +38,10 @@ function ref<T>(initial?: T, onchangeOrOptions?: OnChangeHandler | RefOptions): 
     tick: 0,
     scheduled: false,
   }
-  return createProxy({ value: initial }, cache, (event) => handleChange(event, ticks, options));
+  function onChangeHandler(event: ChangeEvent) {
+    handleChange(event, ticks, options);
+  }
+  return createProxy({ value: initial }, cache, onChangeHandler);
 }
 
 export default ref;

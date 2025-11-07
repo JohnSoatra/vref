@@ -1,4 +1,4 @@
-import { deleteCacheTry, getRawTry } from "../../utils";
+import { removeCacheTry, getRawTry } from "../../utils";
 import { CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";
 
@@ -15,7 +15,7 @@ export default function setHandler(
   const prevValue = target.get(rawKey);
   if (!Object.is(rawValue, prevValue)) {
     target.set(rawKey, rawValue);
-    deleteCacheTry(prevValue, cache);
+    removeCacheTry(prevValue, cache);
     onChange({
       target: proxy,
       action: 'set',
