@@ -1,12 +1,13 @@
 import LookupArrayMethods from "../../../constants/lookupMethods/array";
-import { getRawTry } from "../../utils";
+import { toRawArgs } from "../../utils";
 
 function lookupArrayHandler(
   target: any[],
   key: typeof LookupArrayMethods[number],
   ...args: any[]
 ) {
-  return target[key](getRawTry(args[0]), ...args.slice(1));
+  const [searchElement, fromIndex] = toRawArgs(args);
+  return target[key](searchElement, fromIndex);
 }
 
 export default lookupArrayHandler;

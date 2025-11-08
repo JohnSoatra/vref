@@ -1,3 +1,9 @@
-const MutationTypedArrayMethods = ['copyWithin', 'fill', 'reverse', 'set', 'sort'] as const;
+const MutationTypedArrayMethods = [
+  'copyWithin',
+  'fill',
+  'reverse',
+  'set',
+  'sort',
+] as const;
 
 export default MutationTypedArrayMethods;

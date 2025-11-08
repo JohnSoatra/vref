@@ -1,5 +1,6 @@
-import ProducerArrayMethods from "../../../constants/array";
-import { createProxyTry, getRawTry } from "../../utils";
+import ProducerArrayMethods from "../../../constants/producerMethods/array";
+import Keys from "../../../constants/keys";
+import { createCallbackArgs, toProxiedItems, toRawArgs } from "../../utils";
 import { CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";
 
@@ -10,9 +11,15 @@ function producerArrayHandler(
   onChange: OnChangeHandler,
   ...args: any[]
 ) {
-  const rawArgs = args.map(each => getRawTry(each));
-  const newArray = target[key].apply(target, rawArgs);
-  return newArray.map(each => createProxyTry(each, cache, onChange, false));
+  let value: any[];
+  if (key === Keys.ToSorted) {
+    const [compareFn] = createCallbackArgs(cache, onChange, args[0]);
+    value = target.toSorted(compareFn);
+  } else {
+    const rawArgs = toRawArgs(args);
+    value = target[key].apply(target, rawArgs);
+  }
+  return toProxiedItems(value, cache, onChange);
 }
 
 export default producerArrayHandler;

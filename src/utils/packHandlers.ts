@@ -11,6 +11,7 @@ import iteratorHandler from "./handlers/iteratorHandler";
 import producerArrayHandler from "./handlers/array/producerHandler";
 import { CacheProxy } from "../types/createProxy";
 import { OnChangeHandler } from "../types/ref";
+import pickingArrayHandler from "./handlers/array/pickingHandler";
 
 export default function packHandlers(
   proxy: any,
@@ -20,11 +21,12 @@ export default function packHandlers(
   onChange: OnChangeHandler,
 ) {
   return {
-    mutationArrayHandler: (...args: any[]) => mutationArrayHandler(proxy, target, key, onChange, ...args),
+    mutationArrayHandler: (...args: any[]) => mutationArrayHandler(proxy, target, key, cache, onChange, ...args),
     producerArrayHandler: (...args: any[]) => producerArrayHandler(target, key, cache, onChange, ...args),
     iterationHandler: (...args: any[]) => iterationHandler(target, key, cache, onChange, ...args),
     iteratorHandler: () => iteratorHandler(target, key, cache, onChange),
     lookupArrayHandler: (...args: any[]) => lookupArrayHandler(target, key, ...args),
+    pickingArrayHandler: (...args: any[]) => pickingArrayHandler(target, key, cache, onChange, ...args),
     getHandler: (getKey: any) => getHandler(target, getKey, cache, onChange),
     setHandler: (setKey: any, setValue: any) => setHandler(proxy, target, setKey, setValue, cache, onChange),
     addHandler: (addValue: any) => addHandler(proxy, target, addValue, onChange),

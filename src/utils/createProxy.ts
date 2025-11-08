@@ -13,7 +13,8 @@ import {
   isMutationMethod,
   isForbiddenKey,
   isProducerMethod,
-  removeCacheTry
+  removeCacheTry,
+  isPickingMethod
 } from "./utils";
 import { CacheProxy } from "../types/createProxy";
 import { OnChangeHandler } from "../types/ref";
@@ -52,6 +53,7 @@ export default function createProxy<T extends Record<string, any>>(
         if (isIterationMethod(target, key)) return handlers.iterationHandler;
         if (isIteratorMethod(target, key)) return handlers.iteratorHandler;
         if (isLookupMethod(target, key)) return handlers.lookupArrayHandler;
+        if (isPickingMethod(target, key)) return handlers.pickingArrayHandler;
         if (isMapCollection(target)) {
           if (key === Keys.Get) return handlers.getHandler;
           if (key === Keys.Set) return handlers.setHandler;

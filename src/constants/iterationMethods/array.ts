@@ -1,3 +1,18 @@
-const IterationArrayMethods = ['forEach', 'map', 'filter', 'reduce', 'reduceRight', 'flatMap', 'some', 'sort', 'every', 'find', 'findIndex'] as const;
+const IterationArrayMethods = [
+  'every',
+  'filter',
+  'find',
+  'findIndex',
+  'findLast',
+  'findLastIndex',
+  'flatMap',
+  'forEach',
+  'map',
+  'reduce',
+  'reduceRight',
+  'some',
+  'sort',
+  'toSorted',
+] as const;
 
 export default IterationArrayMethods;

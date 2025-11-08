@@ -8,9 +8,10 @@ import IteratorMethods from "../constants/iteratorMethods";
 import LookupArrayMethods from "../constants/lookupMethods/array";
 import MutationArrayMethods from "../constants/mutationMethods/array";
 import MutationTypedArrayMethods from "../constants/mutationMethods/typedArray";
-import ProducerArrayMethods from "../constants/array";
+import ProducerArrayMethods from "../constants/producerMethods/array";
 import { CacheProxy } from "../types/createProxy";
 import { OnChangeHandler, RefOptions } from "../types/ref";
+import PickingArrayMethods from "../constants/pickingMethods/array";
 
 export function isForbiddenKey(key: any) {
   return Keys.ForbiddenKeys.includes(key);
@@ -54,7 +55,7 @@ export function isIterationMethod(target: object, key: any) {
 
 export function isIteratorMethod(target: object, key: any) {
   return (
-    (isArray(target) || target instanceof Map || target instanceof Set) &&
+    (Array.isArray(target) || target instanceof Map || target instanceof Set) &&
     IteratorMethods.includes(key)
   );
 }
@@ -68,6 +69,10 @@ export function isMutationMethod(target: object, key: any) {
     (Array.isArray(target) && MutationArrayMethods.includes(key)) ||
     (isTypedArray(target) && MutationTypedArrayMethods.includes(key))
   );
+}
+
+export function isPickingMethod(target: object, key: any) {
+  return Array.isArray(target) && PickingArrayMethods.includes(key);
 }
 
 export function isProducerMethod(target: object, key: any) {
@@ -132,5 +137,37 @@ export function createOptions(onchangeOrOptions: OnChangeHandler | RefOptions | 
 export function removeCacheTry(value: any, cache: CacheProxy) {
   if (isCreatable(value)) {
     cache.delete(value);
+  }
+}
+
+export function toRawArgs(args: any[]) {
+  return args.map(each => getRawTry(each));
+}
+
+export function toProxiedItems(array: any[], cache: CacheProxy, onChange: OnChangeHandler) {
+  return array.map(each => createProxyTry(each, cache, onChange, false));
+}
+
+export function createCallbackArgs(cache: CacheProxy, onChange: OnChangeHandler, ...args: any[]) {
+  const [callbackFn, ...restArgs] = args;
+  function callback(this: any, ...callbackArgs: any[]) {
+    const proxiedArgs = callbackArgs.map(arg => createProxyTry(arg, cache, onChange));
+    return callbackFn.apply(this, proxiedArgs);
+  }
+  return [callback, ...restArgs];
+}
+
+export function createProxiedIterator(iterator: Iterator<any>, cache: CacheProxy, onChange: OnChangeHandler) {
+  return {
+    next(value?: any) {
+      const result = iterator.next(value);
+      if (!result.done) {
+        result.value = createProxyTry(result.value, cache, onChange);
+      }
+      return result;
+    },
+    [Symbol.iterator]() {
+      return this;
+    }
   }
 }

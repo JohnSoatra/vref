@@ -1,9 +1,7 @@
 import MutationArrayMethods from "../../../constants/mutationMethods/array";
 import MutationTypedArrayMethods from "../../../constants/mutationMethods/typedArray";
 import Keys from "../../../constants/keys";
-import iterationHandler from "../iterationHandler";
-import producerArrayHandler from "./producerHandler";
-import { getRawTry } from "../../utils";
+import { createCallbackArgs, createProxyTry, toProxiedItems, toRawArgs } from "../../utils";
 import { CacheProxy } from "../../../types/createProxy";
 import { TypedArray } from "../../../types/types";
 import { OnChangeHandler } from "../../../types/ref";
@@ -20,15 +18,26 @@ function mutationArrayHandler<T extends any[] | TypedArray>(
   onChange: OnChangeHandler,
   ...args: any[]
 ) {
-  const rawArgs = args.map(each => getRawTry(each));
   let result: any;
+  let assigned: boolean | undefined;
   if (Array.isArray(target)) {
     if (key === Keys.Sort) {
-      result = iterationHandler(target as any[], key, cache, onChange, ...rawArgs);
+      const [compareFn] = createCallbackArgs(cache, onChange, args[0]);
+      result = target.sort(compareFn);
+      assigned = true;
     } else if (key === Keys.Splice) {
-      result = producerArrayHandler(target as any[], key, cache, onChange, ...rawArgs);
+      const [start, deleteCount, ...items] = toRawArgs(args);
+      const newArray = target.splice(start, deleteCount, ...items);
+      result = toProxiedItems(newArray, cache, onChange);
+      assigned = true;
+    } else if (key === Keys.Pop || key === Keys.Shift) {
+      const deletedItem = (target as any)[key]();
+      result = createProxyTry(deletedItem, cache, onChange, false);
+      assigned = true;
     }
-  } else {
+  }
+  if (!assigned) {
+    const rawArgs = toRawArgs(args);
     result = (target as any)[key].apply(target, rawArgs);
   }
   onChange({
