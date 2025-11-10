@@ -4,7 +4,7 @@ const Keys = {
   Add: 'add',
   Has: 'has',
   Delete: 'delete',
-  ForEach: 'forEach',
+  Clear: 'clear',
   ForbiddenKeys: new Set(['__proto__', 'constructor', 'prototype']),
 } as const;
 

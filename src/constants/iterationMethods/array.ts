@@ -1,15 +1,4 @@
-export type IterationArrayMethods =
-  | 'every'
-  | 'findIndex'
-  | 'findLastIndex'
-  | 'flatMap'
-  | 'forEach'
-  | 'map'
-  | 'reduce'
-  | 'reduceRight'
-  | 'some';
-
-const IterationArrayMethods = new Set<IterationArrayMethods>([
+const IterationArrayMethods = new Set([
   'every',
   'findIndex',
   'findLastIndex',
@@ -19,6 +8,7 @@ const IterationArrayMethods = new Set<IterationArrayMethods>([
   'reduce',
   'reduceRight',
   'some',
-]);
+] as const);
 
+export type IterationArrayMethods = typeof IterationArrayMethods extends Set<infer T> ? T : never;
 export default IterationArrayMethods;

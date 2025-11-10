@@ -1,5 +1,4 @@
-export type PickingArrayMethods = 'at';
+const PickingArrayMethods = new Set(['at'] as const);
 
-const PickingArrayMethods = new Set<PickingArrayMethods>(['at']);
-
+export type PickingArrayMethods = typeof PickingArrayMethods extends Set<infer T> ? T: never;
 export default PickingArrayMethods;

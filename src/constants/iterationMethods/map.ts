@@ -1,5 +1,4 @@
-export type IterationMapMethods = 'forEach';
+const IterationMapMethods = new Set(['forEach'] as const);
 
-const IterationMapMethods = new Set<IterationMapMethods>(['forEach']);
-
+export type IterationMapMethods = typeof IterationMapMethods extends Set<infer T> ? T : never;
 export default IterationMapMethods;
