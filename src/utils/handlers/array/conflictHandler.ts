@@ -1,4 +1,4 @@
-import { createCallbackArgs, createProxyTry, removeFlag, toProxiedItems, toRawArgs, addFlag } from "../../utils";
+import { createCallbackArgs, createProxyTry, removeFlag, toProxiedItems, toRawArgs, addFlag, hasFlag } from "../../utils";
 import { ConflictArrayMethods } from "../../../constants/conflictMethods/array";
 import { CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";
@@ -47,7 +47,7 @@ function conflictArrayHandler(
           return createProxyTry(value, cache, onChange);
         // mutation methods
         case "sort":
-          onChange({
+          hasFlag(this, 'is_proxy') && onChange({
             target: this,
             action: 'sort',
             key: undefined,
@@ -64,7 +64,7 @@ function conflictArrayHandler(
       addFlag(this, 'batch');
       value = (target as any)[key].apply(this, rawArgs);
       removeFlag(this, 'batch');
-      onChange({
+      hasFlag(this, 'is_proxy') && onChange({
         target: this,
         action: key,
         key: undefined,

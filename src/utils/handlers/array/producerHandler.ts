@@ -12,13 +12,6 @@ import { OnChangeHandler } from "../../../types/ref";
  * - Wraps returned arrays/items in proxies for reactive tracking.
  * - Original array is **not mutated** for immutable producer methods.
  * - `splice` still mutates the original array but the returned removed items are proxied.
- *
- * @param target The target array.
- * @param key The producer method name.
- * @param cache WeakMap cache for proxies.
- * @param onChange Callback triggered when nested proxies are accessed.
- * @param args Arguments for the producer method.
- * @returns The proxied array or items returned by the producer method.
  */
 function producerArrayHandler(
   this: any,

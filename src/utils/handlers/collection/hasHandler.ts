@@ -7,10 +7,6 @@ import { getRawTry } from "../../utils";
  * - Converts a proxied key to its raw value to ensure proper lookup.
  * - Works with all supported collections: Map, Set, WeakMap, WeakSet.
  * - Returns a boolean indicating presence.
- *
- * @param target The collection to check.
- * @param key The key or value to look for.
- * @returns `true` if the collection contains the key/value, `false` otherwise.
  */
 export default function hasHandler(
   this: any,

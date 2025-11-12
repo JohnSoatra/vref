@@ -1,4 +1,4 @@
-import { addFlag, removeFlag, toRawArgs } from "../../utils";
+import { addFlag, hasFlag, removeFlag, toRawArgs } from "../../utils";
 import { MutationArrayMethods } from "../../../constants/mutationMethods/array";
 import { MutationTypedArrayMethods } from "../../../constants/mutationMethods/typedArray";
 import { TypedArray } from "../../../types/types";
@@ -14,13 +14,6 @@ type MutationKey<T> = T extends any[] ?
  * Supports `push`, `pop`, `shift`, `splice`, `sort`, `fill`, `copyWithin`, etc.
  * - Converts proxied arguments to raw values.
  * - Triggers `onChange` after mutation.
- *
- * @param proxy The reactive proxy object wrapping the target.
- * @param target The target array or typed array being mutated.
- * @param key The mutation method name.
- * @param onChange Callback triggered after mutation.
- * @param args Arguments for the mutation method.
- * @returns The result of the mutation, or the proxy itself if mutated in-place.
  */
 function mutationArrayHandler<T extends any[] | TypedArray>(
   this: any,
@@ -33,7 +26,7 @@ function mutationArrayHandler<T extends any[] | TypedArray>(
   addFlag(this, 'batch');
   const value = (target as any)[key].apply(this, rawArgs);
   removeFlag(this, 'batch');
-  onChange({
+  hasFlag(this, 'is_proxy') && onChange({
     target: this,
     action: key,
     key: undefined,

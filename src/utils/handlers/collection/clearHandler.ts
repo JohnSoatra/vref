@@ -1,4 +1,4 @@
-import { isMapCollection, removeCacheTry } from "../../utils";
+import { hasFlag, isMapCollection, removeCacheTry } from "../../utils";
 import { CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";
 
@@ -7,9 +7,6 @@ import { OnChangeHandler } from "../../../types/ref";
  *
  * - For Map, removes both keys and values from the cache.
  * - For Set, removes each value from the cache.
- *
- * @param target The original Map or Set to clear from cache.
- * @param cache WeakMap cache storing raw ↔ proxy objects.
  */
 function clearFromCache(target: Map<any, any> | Set<any>, cache: CacheProxy) {
   removeCacheTry(target, cache);
@@ -31,11 +28,6 @@ function clearFromCache(target: Map<any, any> | Set<any>, cache: CacheProxy) {
  * - Clears the collection.
  * - Removes all entries from the proxy cache.
  * - Triggers the `onChange` callback if the collection was non-empty.
- *
- * @param proxy The reactive proxy wrapping the collection.
- * @param target The original Map or Set being cleared.
- * @param cache WeakMap cache storing raw ↔ proxy objects.
- * @param onChange Callback triggered on mutation.
  */
 export default function clearHandler(
   this: any,
@@ -46,14 +38,12 @@ export default function clearHandler(
   if (target.size > 0) {
     target.clear.call(this);
     clearFromCache(target, cache);
-    if (cache.has(this)) {
-      onChange({
-        target: this,
-        action: 'clear',
-        key: undefined,
-        value: undefined,
-        prevValue: undefined,
-      });
-    }
+    hasFlag(this, 'is_proxy') && onChange({
+      target: this,
+      action: 'clear',
+      key: undefined,
+      value: undefined,
+      prevValue: undefined,
+    });
   }
 }
