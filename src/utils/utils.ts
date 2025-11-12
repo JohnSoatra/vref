@@ -117,13 +117,6 @@ export function createProxiedIterator(iterator: Iterator<any>, cache: CacheProxy
   }
 }
 
-export function isFlagKey(key: any) {
-  for (const [_, flag] of Flags) {
-    if (flag === key) return true;
-  }
-  return false;
-}
-
 export function hasFlag(value: any, flag: FlagKey): boolean {
   if (isCreatable(value) && isProxy(value)) {
     return value[Flags.get(flag)!] ?? false;
@@ -147,20 +140,4 @@ export function isPlainObject(value: any): boolean {
   if (Object.prototype.toString.call(value) !== '[object Object]') return false;
   const proto = Object.getPrototypeOf(value)
   return proto === Object.prototype || !!value.constructor;
-}
-
-export function passThis<T extends ((...args: any[]) => any)>(
-  handler: T,
-  ...params: Parameters<T>
-) {
-  return function (this: any, ...args: any[]) {
-    const [target] = params;
-    let thisArg: any;
-    if (isPlainObject(target) || Array.isArray(target)) {
-      thisArg = this;
-    } else {
-      thisArg = getRawTry(this);
-    }
-    handler.apply(thisArg, params.concat(args));
-  }
 }

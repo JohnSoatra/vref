@@ -12,9 +12,29 @@ import iteratorHandler from "./handlers/iteratorHandler";
 import producerArrayHandler from "./handlers/array/producerHandler";
 import pickingArrayHandler from "./handlers/array/pickingHandler";
 import conflictArrayHandler from "./handlers/array/conflictHandler";
-import { passThis } from "./utils";
+import { addFlag, getRawTry, isCreatable, isPlainObject, isProxy, removeFlag } from "./utils";
 import { CacheProxy } from "../types/createProxy";
 import { OnChangeHandler } from "../types/ref";
+
+function passThis<T extends ((...args: any[]) => any)>(
+  handler: T,
+  ...params: Parameters<T>
+) {
+  return function (this: any, ...args: any[]) {
+    const thisIsProxy = isCreatable(this) && isProxy(this);
+    const [target] = params;
+    let thisArg: any;
+    if (isPlainObject(target) || Array.isArray(target)) {
+      thisArg = this;
+    } else {
+      thisArg = getRawTry(this);
+    }
+    thisIsProxy && addFlag(thisArg, 'is_proxy');
+    const result = handler.apply(thisArg, params.concat(args));
+    thisIsProxy && removeFlag(thisArg, 'is_proxy');
+    return result;
+  }
+}
 
 /**
  * Packs and binds all handler functions with shared context.
