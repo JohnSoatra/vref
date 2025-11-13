@@ -19,20 +19,24 @@ import { OnChangeHandler } from "../types/ref";
 function passThis<
   P extends ([target: any, ...args: any[]]),
   T extends ((...params: P) => any),
->(handler: T, ...params: P) {
+>(
+  cache: CacheProxy,
+  handler: T,
+  ...params: P
+) {
   return function (this: any, ...args: any[]) {
-    const thisIsProxy = isObject(this) && isProxy(this);
+    const rawThis = getRawTry(this);
     const [target] = params;
     let thisArg: any;
     if (isPlainObject(target) || Array.isArray(target)) {
       thisArg = this;
     } else {
-      thisArg = getRawTry(this);
+      thisArg = rawThis;
     }
-    thisIsProxy && addFlag(thisArg, 'is_proxy');
-    const result = handler.apply(thisArg, params.concat(args) as P);
-    thisIsProxy && removeFlag(thisArg, 'is_proxy');
-    return result;
+    if (isObject(this) && isProxy(this)) {
+      cache.set(rawThis, this);
+    }
+    return handler.apply(thisArg, params.concat(args) as P);
   }
 }
 
@@ -56,19 +60,19 @@ export default function packHandlers(
   onChange: OnChangeHandler,
 ) {
   return {
-    conflictArrayHandler: passThis(conflictArrayHandler, target, key, cache, onChange),
-    mutationArrayHandler: passThis(mutationArrayHandler, target, key, onChange),
-    producerArrayHandler: passThis(producerArrayHandler, target, key, cache, onChange),
-    iterationHandler: passThis(iterationHandler, target, key, cache, onChange),
-    iteratorHandler: passThis(iteratorHandler, target, key, cache, onChange),
-    lookupArrayHandler: passThis(lookupArrayHandler, target, key),
-    pickingArrayHandler: passThis(pickingArrayHandler, target, key, cache, onChange),
-    getHandler: passThis(getHandler, target, cache, onChange),
-    setHandler: passThis(setHandler, target, cache, onChange),
-    addHandler: passThis(addHandler, target, cache, onChange),
-    hasHandler: passThis(hasHandler, target),
-    deleteHandler: passThis(deleteHandler, target, cache, onChange),
-    clearHandler: passThis(clearHandler, target, cache, onChange),
-    defaultHandler: passThis(defaultHandler, target, key),
+    conflictArrayHandler: passThis(cache, conflictArrayHandler, target, key, cache, onChange),
+    mutationArrayHandler: passThis(cache, mutationArrayHandler, target, key, cache, onChange),
+    producerArrayHandler: passThis(cache, producerArrayHandler, target, key, cache, onChange),
+    iterationHandler: passThis(cache, iterationHandler, target, key, cache, onChange),
+    iteratorHandler: passThis(cache, iteratorHandler, target, key, cache, onChange),
+    lookupArrayHandler: passThis(cache, lookupArrayHandler, target, key),
+    pickingArrayHandler: passThis(cache, pickingArrayHandler, target, key, cache, onChange),
+    getHandler: passThis(cache, getHandler, target, cache, onChange),
+    setHandler: passThis(cache, setHandler, target, cache, onChange),
+    addHandler: passThis(cache, addHandler, target, cache, onChange),
+    hasHandler: passThis(cache, hasHandler, target),
+    deleteHandler: passThis(cache, deleteHandler, target, cache, onChange),
+    clearHandler: passThis(cache, clearHandler, target, cache, onChange),
+    defaultHandler: passThis(cache, defaultHandler, target, key),
   }
 }

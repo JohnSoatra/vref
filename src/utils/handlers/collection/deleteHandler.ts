@@ -12,7 +12,7 @@ import { OnChangeHandler } from "../../../types/ref";
  * - Triggers `onChange` only if deletion actually occurs.
  */
 export default function deleteHandler(
-  this: any,
+  this: any, //expects raw object
   target: Map<any, any> | Set<any> | WeakMap<any, any> | WeakSet<any>,
   cache: CacheProxy,
   onChange: OnChangeHandler,
@@ -25,7 +25,7 @@ export default function deleteHandler(
   if (deleted) {
     removeCacheTry(rawKey, cache);
     isMapCollection(target) && removeCacheTry(prevValue, cache);
-    hasFlag(this, 'is_proxy') && onChange({
+    cache.has(this) && onChange({
       target: this,
       action: 'delete',
       key,

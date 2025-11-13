@@ -11,7 +11,7 @@ import { OnChangeHandler } from "../../../types/ref";
  * - Wraps the returned value in a proxy if it's a creatable object.
  * - Returns `undefined` or the proxied result.
  */
-function pickingArrayHandler(
+export default function pickingArrayHandler(
   this: any,
   target: any[],
   key: PickingArrayMethods,
@@ -23,5 +23,3 @@ function pickingArrayHandler(
   const value = (target as any)[key].apply(this, rawArgs);
   return createProxyTry(value, cache, onChange);
 }
-
-export default pickingArrayHandler;

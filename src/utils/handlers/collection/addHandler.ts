@@ -11,7 +11,7 @@ import { CacheProxy } from "../../../types/createProxy";
  * - Returns the proxy itself for fluent use.
  */
 export default function addHandler(
-  this: any,
+  this: any, //expects raw object
   target: Set<any> | WeakSet<any>,
   cache: CacheProxy,
   onChange: OnChangeHandler,
@@ -22,7 +22,7 @@ export default function addHandler(
   const hasValue = target.has.call(this, rawValue);
   if (!hasValue) {
     target.add.call(this, rawValue);
-    hasFlag(this, 'is_proxy') && onChange({
+    cache.has(this) && onChange({
       target: this,
       action: 'add',
       key: value,

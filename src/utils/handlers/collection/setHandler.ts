@@ -12,7 +12,7 @@ import { OnChangeHandler } from "../../../types/ref";
  * - Returns the proxy for chaining.
  */
 export default function setHandler(
-  this: any,
+  this: any, //expects raw object
   target: Map<any, any> | WeakMap<any, any>,
   cache: CacheProxy,
   onChange: OnChangeHandler,
@@ -25,7 +25,7 @@ export default function setHandler(
   if (!Object.is(rawValue, prevValue)) {
     target.set.call(this, rawKey, rawValue);
     removeCacheTry(prevValue, cache);
-    hasFlag(this, 'is_proxy') && onChange({
+    cache.has(this) && onChange({
       target: this,
       action: 'set',
       key,

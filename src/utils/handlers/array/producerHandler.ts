@@ -13,7 +13,7 @@ import { OnChangeHandler } from "../../../types/ref";
  * - Original array is **not mutated** for immutable producer methods.
  * - `splice` still mutates the original array but the returned removed items are proxied.
  */
-function producerArrayHandler(
+export default function producerArrayHandler(
   this: any,
   target: any[],
   key: ProducerArrayMethods,
@@ -25,5 +25,3 @@ function producerArrayHandler(
   const value = target[key].apply(this, rawArgs);
   return toProxiedItems(value, cache, onChange);
 }
-
-export default producerArrayHandler;

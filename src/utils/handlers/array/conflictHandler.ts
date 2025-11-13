@@ -16,7 +16,7 @@ import { OnChangeHandler } from "../../../types/ref";
  * This handler ensures that the returned values maintain reactivity and properly trigger the
  * onChange callback when mutations occur.
  */
-function conflictArrayHandler(
+export default function conflictArrayHandler(
   this: any,
   target: any[],
   key: ConflictArrayMethods,
@@ -47,7 +47,7 @@ function conflictArrayHandler(
           return createProxyTry(value, cache, onChange);
         // mutation methods
         case "sort":
-          hasFlag(this, 'is_proxy') && onChange({
+          cache.has(this) && onChange({
             target: this,
             action: 'sort',
             key: undefined,
@@ -64,7 +64,7 @@ function conflictArrayHandler(
       addFlag(this, 'batch');
       value = (target as any)[key].apply(this, rawArgs);
       removeFlag(this, 'batch');
-      hasFlag(this, 'is_proxy') && onChange({
+      cache.has(this) && onChange({
         target: this,
         action: key,
         key: undefined,
@@ -82,5 +82,3 @@ function conflictArrayHandler(
       }
   }
 }
-
-export default conflictArrayHandler;

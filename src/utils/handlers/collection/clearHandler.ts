@@ -1,4 +1,4 @@
-import { hasFlag, isMapCollection, removeCacheTry } from "../../utils";
+import { getRawTry, hasFlag, isMapCollection, removeCacheTry } from "../../utils";
 import { CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";
 
@@ -30,7 +30,7 @@ function clearFromCache(target: Map<any, any> | Set<any>, cache: CacheProxy) {
  * - Triggers the `onChange` callback if the collection was non-empty.
  */
 export default function clearHandler(
-  this: any,
+  this: any, //expects raw object
   target: Map<any, any> | Set<any>,
   cache: CacheProxy,
   onChange: OnChangeHandler,
@@ -38,7 +38,7 @@ export default function clearHandler(
   if (target.size > 0) {
     target.clear.call(this);
     clearFromCache(target, cache);
-    hasFlag(this, 'is_proxy') && onChange({
+    cache.has(this) && onChange({
       target: this,
       action: 'clear',
       key: undefined,
