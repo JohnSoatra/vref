@@ -25,13 +25,12 @@ function passThis<
   ...params: P
 ) {
   return function (this: any, ...args: any[]) {
-    const rawThis = getRawTry(this);
     const [target] = params;
     let thisArg: any;
     if (isPlainObject(target)) {
       thisArg = this;
     } else {
-      thisArg = rawThis;
+      thisArg = getRawTry(this);
     }
     checkCache(this, cache);
     return handler.apply(thisArg, params.concat(args) as P);
