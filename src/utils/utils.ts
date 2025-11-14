@@ -110,7 +110,8 @@ export function checkCache(value: any, cache: CacheProxy) {
 export function createProxiedIterator(iterator: Iterator<any>, cache: CacheProxy, onChange: OnChangeHandler) {
   const proxiedIterator = {
     next(this: any, value?: any) {
-      const rawThis = validateThis(this);
+      const matchedThis = this === proxiedIterator ? iterator : this;
+      const rawThis = getRawTry(matchedThis);
       const result = iterator.next.call(rawThis, value);
       if (!result.done) {
         result.value = createProxyTry(result.value, cache, onChange);
@@ -118,14 +119,8 @@ export function createProxiedIterator(iterator: Iterator<any>, cache: CacheProxy
       return result;
     },
     [Symbol.iterator](this: any) {
-      const rawThis = validateThis(this);
-      return rawThis;
+      return getRawTry(this);
     }
-  }
-  function validateThis(target: any) {
-    const validTarget = target === proxiedIterator ? iterator : target;
-    checkCache(validTarget, cache);
-    return getRawTry(validTarget);
   }
   return proxiedIterator;
 }
