@@ -20,8 +20,16 @@ export function isArray(value: any): boolean {
   return Array.isArray(value) || isTypedArray(value);
 }
 
+export function isProxiable(value: any) {
+  return isObject(value) || isArray(value);
+}
+
 export function isProxy(value: object): boolean {
   return (value as any)[Symbols.IsProxy] ?? false;
+}
+
+export function isProxyTry(value: any) {
+  return isProxiable(value) && isProxy(value);
 }
 
 export function isMapCollection(target: object) {
@@ -54,7 +62,7 @@ export function getWeakValue(target: WeakMap<any, any> | WeakSet<any>, key: any)
 }
 
 export function getRawTry(value: any) {
-  if (isObject(value) && isProxy(value)) {
+  if (isProxyTry(value)) {
     return getRaw(value);
   }
   return value;
@@ -64,7 +72,7 @@ export function createProxyTry<T extends object>(
   ...args: Parameters<typeof createProxy<T>>
 ) {
   const [value] = args;
-  if (isObject(value)) {
+  if (isProxiable(value)) {
     return createProxy(...args);
   }
   return value;
@@ -97,7 +105,7 @@ export function createCallbackArgs(cache: CacheProxy, onChange: OnChangeHandler,
 }
 
 export function checkCache(value: any, cache: CacheProxy) {
-  if (isObject(value) && isProxy(value)) {
+  if (isProxyTry(value)) {
     cache.set(getRaw(value), value);
   }
 }

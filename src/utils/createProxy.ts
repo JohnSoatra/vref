@@ -12,14 +12,14 @@ import IterationMapMethods from "../constants/iterationMethods/map";
 import IterationSetMethods from "../constants/iterationMethods/set";
 import packHandlers from "./packHandlers";
 import {
-  isArray,
   isProxy,
   isMapCollection,
   isSetCollection,
   isCollection,
   isForbiddenKey,
   isTypedArray,
-  isStrongCollection
+  isStrongCollection,
+  isProxiable
 } from "./utils";
 import { CacheProxy } from "../types/createProxy";
 import { OnChangeHandler } from "../types/ref";
@@ -57,52 +57,46 @@ export default function createProxy<T extends object>(
       let value: any;
       try { value = Reflect.get(target, key, receiver); }
       catch { value = Reflect.get(target, key); }
-      if (
-        !(isForbiddenKey(key) || value === undefined || value === null) &&
-        (
-          isArray(value) ||
-          typeof value === 'object' ||
-          typeof value === 'function'
-        )
-      ) {
-        if (isArray(value) || typeof value === 'object') {
+      if (!(isForbiddenKey(key) || value === undefined)) {
+        if (isProxiable(value)) {
           return createProxy(value, cache, onChange);
+        } else if (typeof value === 'function') {
+          const handlers = packHandlers(target, key, cache, onChange);
+          if (Array.isArray(target)) {
+            if (ConflictArrayMethods.has(key)) return handlers.conflictArrayHandler;
+            if (MutationArrayMethods.has(key)) return handlers.mutationArrayHandler;
+            if (ProducerArrayMethods.has(key)) return handlers.producerArrayHandler;
+            if (IterationArrayMethods.has(key)) return handlers.iterationHandler;
+            if (IteratorMethods.has(key)) return handlers.iteratorHandler;
+            if (LookupArrayMethods.has(key)) return handlers.lookupArrayHandler;
+            if (PickingArrayMethods.has(key)) return handlers.pickingArrayHandler;
+          }
+          if (isTypedArray(target) && MutationTypedArrayMethods.has(key)) {
+            return handlers.mutationArrayHandler;
+          }
+          if (isMapCollection(target)) {
+            if (key === Keys.Get) return handlers.getHandler;
+            if (key === Keys.Set) return handlers.setHandler;
+          }
+          if (isSetCollection(target) && key === Keys.Add) {
+            return handlers.addHandler;
+          }
+          if (
+            (target instanceof Map && IterationMapMethods.has(key)) ||
+            (target instanceof Set && IterationSetMethods.has(key))
+          ) {
+            return handlers.iterationHandler;
+          }
+          if (isStrongCollection(target)) {
+            if (key === Keys.Clear) return handlers.clearHandler;
+            if (IteratorMethods.has(key)) return handlers.iteratorHandler;
+          }
+          if (isCollection(target)) {
+            if (key === Keys.Has) return handlers.hasHandler;
+            if (key === Keys.Delete) return handlers.deleteHandler;
+          }
+          return handlers.defaultHandler;
         }
-        const handlers = packHandlers(target, key, cache, onChange);
-        if (Array.isArray(target)) {
-          if (ConflictArrayMethods.has(key)) return handlers.conflictArrayHandler;
-          if (MutationArrayMethods.has(key)) return handlers.mutationArrayHandler;
-          if (ProducerArrayMethods.has(key)) return handlers.producerArrayHandler;
-          if (IterationArrayMethods.has(key)) return handlers.iterationHandler;
-          if (IteratorMethods.has(key)) return handlers.iteratorHandler;
-          if (LookupArrayMethods.has(key)) return handlers.lookupArrayHandler;
-          if (PickingArrayMethods.has(key)) return handlers.pickingArrayHandler;
-        }
-        if (isTypedArray(target) && MutationTypedArrayMethods.has(key)) {
-          return handlers.mutationArrayHandler;
-        }
-        if (isMapCollection(target)) {
-          if (key === Keys.Get) return handlers.getHandler;
-          if (key === Keys.Set) return handlers.setHandler;
-        }
-        if (isSetCollection(target) && key === Keys.Add) {
-          return handlers.addHandler;
-        }
-        if (
-          (target instanceof Map && IterationMapMethods.has(key)) ||
-          (target instanceof Set && IterationSetMethods.has(key))
-        ) {
-          return handlers.iterationHandler;
-        }
-        if (isStrongCollection(target)) {
-          if (key === Keys.Clear) return handlers.clearHandler;
-          if (IteratorMethods.has(key)) return handlers.iteratorHandler;
-        }
-        if (isCollection(target)) {
-          if (key === Keys.Has) return handlers.hasHandler;
-          if (key === Keys.Delete) return handlers.deleteHandler;
-        }
-        return handlers.defaultHandler;
       }
       return value;
     },
