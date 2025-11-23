@@ -35,5 +35,5 @@ export default function mutationArrayHandler<T extends any[] | TypedArray>(
     value: args,
     prevValue: undefined
   });
-  return value;
+  return (value === this && proxy) ? proxy : value;
 }
