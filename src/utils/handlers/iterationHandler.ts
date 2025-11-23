@@ -2,7 +2,7 @@ import { IterationArrayMethods } from "../../constants/iterationMethods/array";
 import { IterationMapMethods } from "../../constants/iterationMethods/map";
 import { IterationSetMethods } from "../../constants/iterationMethods/set";
 import { createCallbackArgs } from "../utils";
-import { CacheProxy } from "../../types/createProxy";
+import { CacheParentsProxy, CacheProxy } from "../../types/createProxy";
 import { OnChangeHandler } from "../../types/ref";
 
 type IterationKey<T> =
@@ -27,11 +27,18 @@ export default function iterationHandler<T extends any[] | Map<any, any> | Set<a
   this: T,
   target: T,
   cache: CacheProxy,
+  cacheParent: CacheParentsProxy,
   key: IterationKey<T>,
   onChange: OnChangeHandler,
   ...args: any[]
 ) {
-  const isProxied = cache.has(this);
-  const callbackArgs = isProxied ? createCallbackArgs(cache, onChange, ...args) : args;
+  const proxy = cache.get(this);
+  const callbackArgs = proxy ? createCallbackArgs(
+    proxy,
+    cache,
+    cacheParent,
+    onChange,
+    ...args
+  ) : args;
   return (target as any)[key].apply(this, callbackArgs);
 }

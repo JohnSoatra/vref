@@ -1,6 +1,6 @@
 import { ProducerArrayMethods } from "../../../constants/producerMethods/array";
 import { toProxiedItems, toRawArgs } from "../../utils";
-import { CacheProxy } from "../../../types/createProxy";
+import { CacheParentsProxy, CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";
 
 /**
@@ -16,12 +16,19 @@ export default function producerArrayHandler<T extends any[]>(
   this: T,
   target: T,
   cache: CacheProxy,
+  cacheParent: CacheParentsProxy,
   key: ProducerArrayMethods,
   onChange: OnChangeHandler,
   ...args: any[]
 ) {
-  const isProxied = cache.has(this);
-  const rawArgs = isProxied ? toRawArgs(args) : args;
+  const proxy = cache.get(this);
+  const rawArgs = proxy ? toRawArgs(args) : args;
   const value = target[key].apply(this, rawArgs);
-  return isProxied ? toProxiedItems(value, cache, onChange) : value;
+  return proxy ? toProxiedItems(
+    value,
+    proxy,
+    cache,
+    cacheParent,
+    onChange
+  ) : value;
 }

@@ -25,7 +25,7 @@ export type OnChangeHandler = (event: ChangeEvent) => void;
  * Options for configuring a reactive Ref.
  */
 export type RefOptions = {
-    /**
+  /**
    * Optional cache used to store mappings of raw objects to their corresponding proxies.
    *
    * This ensures that the same object reference always returns the same proxy,
@@ -38,6 +38,18 @@ export type RefOptions = {
    * ⚠️ Note: Passing an invalid or reused cache may cause unexpected proxy behavior.
    */
   cache?: WeakMap<object, object>;
+  /**
+   * Optional cache used to track the direct parent proxies of each raw object.
+   *
+   * Stores a mapping where the key is a raw object and the value is a Set of
+   * its immediate proxy parents (one level up in the object graph).
+   *
+   * Normally, this cache is internally managed. You can provide your own
+   * WeakMap if you want multiple refs to share the same parent-tracking graph.
+   *
+   * ⚠️ Note: Passing an invalid or reused cache may cause unexpected proxy behavior.
+   */
+  cacheParents?: WeakMap<object, Set<object>>,
 };
 
 /**

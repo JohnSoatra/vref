@@ -1,18 +1,20 @@
 import { IteratorMethods } from "../../constants/iteratorMethods";
 import { createProxyTry, getRawTry, isMapCollection } from "../utils";
-import { CacheProxy } from "../../types/createProxy";
+import { CacheParentsProxy, CacheProxy } from "../../types/createProxy";
 import { OnChangeHandler } from "../../types/ref";
 
-export function createProxiedIterator(
+export function createProxiedIterator<T extends any[] | Map<any, any> | Set<any>>(
   iterator: Iterator<any>,
-  ...args: Parameters<typeof iteratorHandler<
-    any[] | Map<any, any> | Set<any>
-  >>
+  target: T,
+  parent: object | undefined,
+  cache: CacheProxy,
+  cacheParent: CacheParentsProxy,
+  key: IteratorMethods,
+  onChange: OnChangeHandler,
 ): Iterator<any> & Iterable<any> {
-  const [thisTarget, cache, key, onChange] = args;
-  const isTargetArray = Array.isArray(thisTarget);
+  const isTargetArray = Array.isArray(target);
   const isResultArray = key === 'entries' || (
-    isMapCollection(thisTarget) && key === Symbol.iterator
+    isMapCollection(target) && key === Symbol.iterator
   );
   const proxiedIterator = {
     next(this: any, value?: any) {
@@ -23,12 +25,30 @@ export function createProxiedIterator(
         if (isResultArray) {
           if (isTargetArray) {
             const [, item] = result.value;
-            result.value[1] = createProxyTry(item, cache, onChange);
+            result.value[1] = createProxyTry(
+              item,
+              parent,
+              cache,
+              cacheParent,
+              onChange
+            );
           } else {
-            result.value = result.value.map((each: any) => createProxyTry(each, cache, onChange));
+            result.value = result.value.map((each: any) => createProxyTry(
+              each,
+              parent,
+              cache,
+              cacheParent,
+              onChange
+            ));
           }
         } else {
-          result.value = createProxyTry(result.value, cache, onChange);
+          result.value = createProxyTry(
+            result.value,
+            parent,
+            cache,
+            cacheParent,
+            onChange
+          );
         }
       }
       return result;
@@ -54,12 +74,19 @@ export default function iteratorHandler<T extends any[] | Map<any, any> | Set<an
   this: T,
   target: T,
   cache: CacheProxy,
+  cacheParent: CacheParentsProxy,
   key: IteratorMethods,
   onChange: OnChangeHandler,
 ) {
-  const isProxied = cache.get(this);
+  const proxy = cache.get(this);
   const iterator = target[key].call(this) as Iterator<any> & Iterable<any>;
-  return isProxied ?
-    createProxiedIterator(iterator, this, cache, key,  onChange) :
-    iterator;
+  return proxy ? createProxiedIterator(
+    iterator,
+    this,
+    proxy,
+    cache,
+    cacheParent,
+    key,
+    onChange
+  ) : iterator;
 }

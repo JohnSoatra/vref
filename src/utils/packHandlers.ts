@@ -13,7 +13,7 @@ import producerArrayHandler from "./handlers/array/producerHandler";
 import pickingArrayHandler from "./handlers/array/pickingHandler";
 import conflictArrayHandler from "./handlers/array/conflictHandler";
 import { checkCache, getRawTry, isPlainObject } from "./utils";
-import { CacheProxy } from "../types/createProxy";
+import { CacheParentsProxy, CacheProxy } from "../types/createProxy";
 import { OnChangeHandler } from "../types/ref";
 
 function passThis<
@@ -52,17 +52,18 @@ export default function packHandlers(
   target: any,
   key: any,
   cache: CacheProxy,
+  cacheParents: CacheParentsProxy,
   onChange: OnChangeHandler,
 ) {
   return {
-    conflictArrayHandler: passThis(conflictArrayHandler, target, cache, key, onChange),
+    conflictArrayHandler: passThis(conflictArrayHandler, target, cache, cacheParents, key, onChange),
     mutationArrayHandler: passThis(mutationArrayHandler, target, cache, key, onChange),
-    producerArrayHandler: passThis(producerArrayHandler, target, cache, key, onChange),
-    iterationHandler: passThis(iterationHandler, target, cache, key, onChange),
-    iteratorHandler: passThis(iteratorHandler, target, cache, key, onChange),
+    producerArrayHandler: passThis(producerArrayHandler, target, cache, cacheParents, key, onChange),
+    iterationHandler: passThis(iterationHandler, target, cache, cacheParents, key, onChange),
+    iteratorHandler: passThis(iteratorHandler, target, cache, cacheParents, key, onChange),
     lookupArrayHandler: passThis(lookupArrayHandler, target, cache, key),
-    pickingArrayHandler: passThis(pickingArrayHandler, target, cache, key, onChange),
-    getHandler: passThis(getHandler, target, cache, onChange),
+    pickingArrayHandler: passThis(pickingArrayHandler, target, cache, cacheParents, key, onChange),
+    getHandler: passThis(getHandler, target, cache, cacheParents, onChange),
     setHandler: passThis(setHandler, target, cache, onChange),
     addHandler: passThis(addHandler, target, cache, onChange),
     hasHandler: passThis(hasHandler, target, cache),

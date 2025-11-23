@@ -21,7 +21,7 @@ import {
   isStrongCollection,
   isProxiable
 } from "./utils";
-import { CacheProxy } from "../types/createProxy";
+import { CacheParentsProxy, CacheProxy } from "../types/createProxy";
 import { OnChangeHandler } from "../types/ref";
 
 /**
@@ -41,17 +41,27 @@ import { OnChangeHandler } from "../types/ref";
  */
 export default function createProxy<T extends object>(
   content: T,
+  parent: object | undefined,
   cache: CacheProxy,
+  cacheParents: CacheParentsProxy,
   onChange: OnChangeHandler,
   saveProxy?: boolean,
 ) {
   if (isProxy(content)) return content;
+  let parents = cacheParents.get(content);
+  if (!parents) {
+    parents = new Set(parent ? [parent] : []);
+    cacheParents.set(content, parents);
+  } else if (parent) {
+    parents.add(parent);
+  }
   const cachedProxy = cache.get(content);
   if (cachedProxy) return cachedProxy;
 
   let fromSetTrap = false;
   const proxy = new Proxy(content, {
     get(target: any, key: any, receiver) {
+      if (key === Symbols.Parents) return parents;
       if (key === Symbols.IsProxy) return true;
       if (key === Symbols.RawObject) return content;
       let value: any;
@@ -59,9 +69,15 @@ export default function createProxy<T extends object>(
       catch { value = Reflect.get(target, key); }
       if (!(isForbiddenKey(key) || value === undefined)) {
         if (isProxiable(value)) {
-          return createProxy(value, cache, onChange);
+          return createProxy(
+            value,
+            proxy,
+            cache,
+            cacheParents,
+            onChange
+          );
         } else if (typeof value === 'function') {
-          const handlers = packHandlers(target, key, cache, onChange);
+          const handlers = packHandlers(target, key, cache, cacheParents, onChange);
           if (Array.isArray(target)) {
             if (ConflictArrayMethods.has(key)) return handlers.conflictArrayHandler;
             if (MutationArrayMethods.has(key)) return handlers.mutationArrayHandler;

@@ -1,7 +1,7 @@
 import Keys from "../constants/keys";
 import Symbols from "../constants/symbols";
 import createProxy from "./createProxy";
-import { CacheProxy } from "../types/createProxy";
+import { CacheParentsProxy, CacheProxy } from "../types/createProxy";
 import { OnChangeHandler } from "../types/ref";
 
 export function isForbiddenKey(key: any) {
@@ -30,6 +30,14 @@ export function isProxy(value: object): boolean {
 
 export function isProxyTry(value: any) {
   return isProxiable(value) && isProxy(value);
+}
+
+export function getParents(value: object) {
+  return (value as any)[Symbols.Parents];
+}
+
+export function getParentsTry(value: any): Set<object> | undefined {
+  return isProxyTry(value) ? getParents(value) : undefined;
 }
 
 export function isMapCollection(target: object) {
@@ -82,20 +90,45 @@ export function toRawArgs(args: any[]) {
   return args.map(each => getRawTry(each));
 }
 
-export function toProxiedItems(array: any[], cache: CacheProxy, onChange: OnChangeHandler) {
-  return array.map(each => createProxyTry(each, cache, onChange, false));
+export function toProxiedItems(
+  array: any[],
+  parent: object | undefined,
+  cache: CacheProxy,
+  cacheParent: CacheParentsProxy,
+  onChange: OnChangeHandler
+) {
+  return array.map(each => createProxyTry(
+    each,
+    parent,
+    cache,
+    cacheParent,
+    onChange,
+    false
+  ));
 }
 
 /**
  * Wraps callback functions passed to array/map/set iteration methods
  * to ensure reactive proxy values are passed to the original callback.
  */
-export function createCallbackArgs(cache: CacheProxy, onChange: OnChangeHandler, ...args: any[]) {
+export function createCallbackArgs(
+  parent: object | undefined,
+  cache: CacheProxy,
+  cacheParent: CacheParentsProxy,
+  onChange: OnChangeHandler,
+  ...args: any[]
+) {
   if (args.length > 0) {
     const [callbackFn, ...restArgs] = args;
     if (typeof callbackFn === 'function') {
       function callback(this: any, ...callbackArgs: any[]) {
-        const proxiedArgs = callbackArgs.map(arg => createProxyTry(arg, cache, onChange));
+        const proxiedArgs = callbackArgs.map(arg => createProxyTry(
+          arg,
+          parent,
+          cache,
+          cacheParent,
+          onChange
+        ));
         return callbackFn.apply(this, proxiedArgs);
       }
       return [callback, ...restArgs];

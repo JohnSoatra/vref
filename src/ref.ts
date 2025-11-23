@@ -21,7 +21,14 @@ import { OnChangeHandler, Ref, RefOptions } from './types/ref';
  */
 function ref<T>(initial: T, onchange: OnChangeHandler, options?: RefOptions): Ref<T> {
   const cache = options?.cache ?? new WeakMap();
-  return createProxy(Object.preventExtensions({ value: initial }), cache, onchange);
+  const cacheParent = options?.cacheParents ?? new WeakMap();
+  return createProxy(
+    Object.preventExtensions({ value: initial }),
+    undefined,
+    cache,
+    cacheParent,
+    onchange
+  );
 }
 
 export default ref;

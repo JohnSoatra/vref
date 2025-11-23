@@ -1,6 +1,6 @@
 import { ConflictArrayMethods } from "../../../constants/conflictMethods/array";
 import { createCallbackArgs, createProxyTry, toProxiedItems, toRawArgs } from "../../utils";
-import { CacheProxy } from "../../../types/createProxy";
+import { CacheParentsProxy, CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";
 
 /**
@@ -21,6 +21,7 @@ export default function conflictArrayHandler<T extends any[]>(
   this: T,
   target: T,
   cache: CacheProxy,
+  cacheParent: CacheParentsProxy,
   key: ConflictArrayMethods,
   onChange: OnChangeHandler,
   ...args: any[]
@@ -34,17 +35,35 @@ export default function conflictArrayHandler<T extends any[]>(
     case "findLast":
     case "sort":
     case "toSorted":
-      const callbackArgs = proxy ? createCallbackArgs(cache, onChange, ...args) : args;
+      const callbackArgs = proxy ? createCallbackArgs(
+        proxy,
+        cache,
+        cacheParent,
+        onChange,
+        ...args
+      ) : args;
       value = (target as any)[key].apply(this, callbackArgs);
       switch (key) {
         // producer methods
         case "filter":
         case "toSorted":
-          return proxy ? toProxiedItems(value, cache, onChange) : value;
+          return proxy ? toProxiedItems(
+            value,
+            proxy,
+            cache,
+            cacheParent,
+            onChange
+          ) : value;
         // picking methods
         case "find":
         case "findLast":
-          return proxy ? createProxyTry(value, cache, onChange) : value;
+          return proxy ? createProxyTry(
+            value,
+            proxy,
+            cache,
+            cacheParent,
+            onChange
+          ) : value;
         // mutation methods
         case "sort":
           proxy && onChange({
@@ -73,10 +92,23 @@ export default function conflictArrayHandler<T extends any[]>(
         // picking methods
         case "pop":
         case "shift":
-          return proxy ? createProxyTry(value, cache, onChange, false) : value;
+          return proxy ? createProxyTry(
+            value,
+            proxy,
+            cache,
+            cacheParent,
+            onChange,
+            false
+          ) : value;
         // producer methods
         case "splice":
-          return proxy ? toProxiedItems(value, cache, onChange) : value;
+          return proxy ? toProxiedItems(
+            value,
+            proxy,
+            cache,
+            cacheParent,
+            onChange
+          ) : value;
       }
   }
 }

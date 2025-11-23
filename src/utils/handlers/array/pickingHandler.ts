@@ -1,6 +1,6 @@
 import { PickingArrayMethods } from "../../../constants/pickingMethods/array";
 import { createProxyTry, toRawArgs } from "../../utils";
-import { CacheProxy } from "../../../types/createProxy";
+import { CacheParentsProxy, CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";
 
 /**
@@ -16,12 +16,19 @@ export default function pickingArrayHandler<T extends any[]>(
   this: T,
   target: T,
   cache: CacheProxy,
+  cacheParent: CacheParentsProxy,
   key: PickingArrayMethods,
   onChange: OnChangeHandler,
   ...args: any[]
 ) {
-  const isProxied = cache.has(this);
-  const rawArgs = isProxied ? toRawArgs(args) : args;
+  const proxy = cache.get(this);
+  const rawArgs = proxy ? toRawArgs(args) : args;
   const value = (target as any)[key].apply(this, rawArgs);
-  return isProxied ? createProxyTry(value, cache, onChange) : value;
+  return proxy ? createProxyTry(
+    value,
+    proxy,
+    cache,
+    cacheParent,
+    onChange
+  ) : value;
 }

@@ -1,5 +1,5 @@
 import { createProxyTry, getRawTry } from "../../utils";
-import { CacheProxy } from "../../../types/createProxy";
+import { CacheParentsProxy, CacheProxy } from "../../../types/createProxy";
 import { OnChangeHandler } from "../../../types/ref";
 
 /**
@@ -15,12 +15,19 @@ export default function getHandler<T extends Map<any, any> | WeakMap<any, any>>(
   this: T,
   target: T,
   cache: CacheProxy,
+  cacheParent: CacheParentsProxy,
   onChange: OnChangeHandler,
   ...args: any[]
 ) {
-  const isProxied = cache.has(this);
+  const proxy = cache.get(this);
   const [key] = args;
-  const rawKey = isProxied ? getRawTry(key) : key;
+  const rawKey = proxy ? getRawTry(key) : key;
   const value = target.get.call(this, rawKey);
-  return isProxied ? createProxyTry(value, cache, onChange) : value;
+  return proxy ? createProxyTry(
+    value,
+    proxy,
+    cache,
+    cacheParent,
+    onChange
+  ) : value;
 }
