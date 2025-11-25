@@ -1,7 +1,8 @@
+import Keys from "../../constants/keys";
 import { IterationArrayMethods } from "../../constants/iterationMethods/array";
 import { IterationMapMethods } from "../../constants/iterationMethods/map";
 import { IterationSetMethods } from "../../constants/iterationMethods/set";
-import { createCallbackArgs } from "../utils";
+import { createCallbackArgs, createProxyTry } from "../utils";
 import { CacheParentsProxy, CacheProxy } from "../../types/createProxy";
 import { OnChangeHandler } from "../../types/ref";
 
@@ -11,6 +12,29 @@ type IterationKey<T> =
   T extends Map<any, any> ?
   IterationMapMethods :
   IterationSetMethods;
+
+function reducerCallbackArgs(
+  cache: CacheProxy,
+  cacheParents: CacheParentsProxy,
+  onChange: OnChangeHandler,
+  ...args: any[]
+) {
+  const [callbackFn, ...restArgs] = args;
+  function callback(this: any, ...callbackArgs: any[]) {
+    const proxiedArgs = callbackArgs.map((arg, index) => index > 0 ?
+      createProxyTry(
+        arg,
+        undefined,
+        cache,
+        cacheParents,
+        onChange,
+        false,
+      ) : arg
+    );
+    return callbackFn.apply(this, proxiedArgs);
+  }
+  return [callback, ...restArgs];
+}
 
 /**
  * Handles iteration methods like `forEach`, `map`, `filter`, `some`, `every`, etc.
@@ -33,12 +57,23 @@ export default function iterationHandler<T extends any[] | Map<any, any> | Set<a
   ...args: any[]
 ) {
   const proxy = cache.get(this);
-  const callbackArgs = proxy ? createCallbackArgs(
-    proxy,
-    cache,
-    cacheParents,
-    onChange,
-    ...args
-  ) : args;
+  let callbackArgs: any[];
+  if (proxy) {
+    callbackArgs = key === Keys.Reduce ?
+      reducerCallbackArgs(
+        cache,
+        cacheParents,
+        onChange,
+        ...args
+      ) :
+      createCallbackArgs(
+        cache,
+        cacheParents,
+        onChange,
+        ...args
+      );
+  } else {
+    callbackArgs = args;
+  }
   return (target as any)[key].apply(this, callbackArgs);
 }

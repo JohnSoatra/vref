@@ -35,6 +35,7 @@ import { OnChangeHandler } from "../types/ref";
  *
  * @param content Target object or collection to proxy.
  * @param cache WeakMap used to store raw-to-proxy mappings for identity preservation.
+ * @param cacheParents WeakMap used to store raw to it's direct proxied-parents.
  * @param onChange Callback triggered when reactive mutations occur.
  * @param saveProxy Whether to store the proxy in cache (defaults to true).
  * @returns A reactive Proxy wrapping the original content.

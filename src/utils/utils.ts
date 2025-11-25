@@ -123,27 +123,25 @@ export function toProxiedItems(
  * to ensure reactive proxy values are passed to the original callback.
  */
 export function createCallbackArgs(
-  parent: object | undefined,
   cache: CacheProxy,
   cacheParents: CacheParentsProxy,
   onChange: OnChangeHandler,
   ...args: any[]
 ) {
-  if (args.length > 0) {
-    const [callbackFn, ...restArgs] = args;
-    if (typeof callbackFn === 'function') {
-      function callback(this: any, ...callbackArgs: any[]) {
-        const proxiedArgs = callbackArgs.map(arg => createProxyTry(
-          arg,
-          parent,
-          cache,
-          cacheParents,
-          onChange
-        ));
-        return callbackFn.apply(this, proxiedArgs);
-      }
-      return [callback, ...restArgs];
+  const [callbackFn, ...restArgs] = args;
+  if (typeof callbackFn === 'function') {
+    function callback(this: any, ...callbackArgs: any[]) {
+      const proxiedArgs = callbackArgs.map(arg => createProxyTry(
+        arg,
+        undefined,
+        cache,
+        cacheParents,
+        onChange,
+        false,
+      ));
+      return callbackFn.apply(this, proxiedArgs);
     }
+    return [callback, ...restArgs];
   }
   return args;
 }

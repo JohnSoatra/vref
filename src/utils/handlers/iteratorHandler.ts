@@ -30,7 +30,8 @@ export function createProxiedIterator<T extends any[] | Map<any, any> | Set<any>
               parent,
               cache,
               cacheParents,
-              onChange
+              onChange,
+              false,
             );
           } else {
             result.value = result.value.map((each: any) => createProxyTry(
@@ -38,7 +39,8 @@ export function createProxiedIterator<T extends any[] | Map<any, any> | Set<any>
               parent,
               cache,
               cacheParents,
-              onChange
+              onChange,
+              false,
             ));
           }
         } else {
@@ -47,7 +49,8 @@ export function createProxiedIterator<T extends any[] | Map<any, any> | Set<any>
             parent,
             cache,
             cacheParents,
-            onChange
+            onChange,
+            false,
           );
         }
       }
