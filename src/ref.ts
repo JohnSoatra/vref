@@ -7,6 +7,7 @@ import { OnChangeHandler, Ref, RefOptions } from './types/ref';
  * - `value`: the reactive value.
  * - `onchange`: callback triggered on every change.
  * - `options.cache`: optional WeakMap for shared proxy identity.
+ * - `options.cacheParents`: optional WeakMap for parents proxy.
  *
  * Example:
  * ```ts

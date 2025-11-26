@@ -1,27 +1,31 @@
 # VRef
 
-A tiny library to track variable's updates.
-Designed to be **low-level** and **predictable**.
+A minimal reactive library to track and respond to changes in variables, providing predictable, low-level reactivity.
 
 ---
 
-### Basic usage
+### Usage
 
 ```ts
 import ref from 'vref';
 
-const count = ref(0, e => console.log('Changed:', e.value));
+// Primitive value
+const count = ref(0, (evt) => {
+  console.log('Changed:', evt.value);
+});
 
 count.value = 1;
 count.value++;
+
 console.log(count.value); // 2
-```
 
-```ts
-const user = ref({ name: 'John', age: 25 }, e => console.log(e));
+// Object value
+const user = ref({ name: 'John', age: 25 }, (evt) => {
+  console.log('Changed:', evt);
+});
 
-user.value.age = 26;     // reactive
-user.value.name = 'Doe'; // reactive
+user.value.age = 26;     // triggers onchange
+user.value.name = 'Doe'; // triggers onchange
 ```
 
 ---
