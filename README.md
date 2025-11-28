@@ -1,6 +1,6 @@
 # VRef
 
-A minimal reactive library to track and respond to changes in variables, providing predictable, low-level reactivity.
+A Tiny Reactive library to track and respond to changes in variables, providing predictable low-level reactivity.
 
 ---
 
@@ -30,4 +30,4 @@ user.value.name = 'Doe'; // triggers onchange
 
 ---
 
-Simple. Reactive. Proxy-powered.
+Low-Level. Simple. Reactive.
