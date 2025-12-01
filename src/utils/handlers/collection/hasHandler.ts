@@ -15,6 +15,7 @@ export default function hasHandler<T extends
   | WeakMap<any, any>
   | WeakSet<any>
 >(
+  // expects raw object
   this: T,
   target: T,
   cache: CacheProxy,

@@ -1,8 +1,7 @@
-import Keys from "../../constants/keys";
 import { IterationArrayMethods } from "../../constants/iterationMethods/array";
 import { IterationMapMethods } from "../../constants/iterationMethods/map";
 import { IterationSetMethods } from "../../constants/iterationMethods/set";
-import { createCallbackArgs, reducerCallbackArgs } from "../utils";
+import { createCallbackArgs, isReduceKey, reduceCallbackArgs } from "../utils";
 import { CacheParentsProxy, CacheProxy } from "../../types/createProxy";
 import { OnChangeHandler } from "../../types/ref";
 
@@ -36,8 +35,8 @@ export default function iterationHandler<T extends any[] | Map<any, any> | Set<a
   const proxy = cache.get(this);
   let callbackArgs: any[];
   if (proxy) {
-    callbackArgs = Keys.ReduceKeys.has(key) ?
-      reducerCallbackArgs(
+    callbackArgs = isReduceKey(key) ?
+      reduceCallbackArgs(
         this as any[],
         proxy,
         cache,

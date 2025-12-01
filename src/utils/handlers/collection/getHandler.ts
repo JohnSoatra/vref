@@ -11,7 +11,7 @@ import { OnChangeHandler } from "../../../types/ref";
  * - Does not modify the original collection.
  */
 export default function getHandler<T extends Map<any, any> | WeakMap<any, any>>(
-  // expects raw object,
+  // expects raw object
   this: T,
   target: T,
   cache: CacheProxy,

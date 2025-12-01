@@ -8,6 +8,10 @@ export function isForbiddenKey(key: any) {
   return Keys.ForbiddenKeys.has(key);
 }
 
+export function isReduceKey(key: any) {
+  return Keys.ReduceKeys.has(key);
+}
+
 export function isObject(value: any) {
   return typeof value === 'object' && value !== null;
 }
@@ -151,7 +155,7 @@ export function createCallbackArgs<T extends any[] | Map<any ,any> | Set<any>>(
   return args;
 }
 
-export function reducerCallbackArgs(
+export function reduceCallbackArgs(
   target: any[],
   parent: object | undefined,
   cache: CacheProxy,
