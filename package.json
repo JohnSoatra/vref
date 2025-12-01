@@ -1,6 +1,6 @@
 {
   "name": "vref",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "license": "MIT",
   "author": "John Soatra",
   "description": "A Javascript library for reactive state management.",
@@ -9,6 +9,7 @@
     "type": "git",
     "url": "https://github.com/JohnSoatra/vref"
   },
+  "homepage": "https://doc.soatra.com/vref",
   "main": "dist/index.cjs.cjs",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
