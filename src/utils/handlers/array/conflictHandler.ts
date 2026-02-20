@@ -50,10 +50,12 @@ export default function conflictArrayHandler<T extends any[]>(
         case "toSorted":
           return proxy ? toProxiedItems(
             value,
+            target,
             proxy,
             cache,
             cacheParents,
-            onChange
+            onChange,
+            true,
           ) : value;
         // picking methods
         case "find":
@@ -105,10 +107,12 @@ export default function conflictArrayHandler<T extends any[]>(
         case "splice":
           return proxy ? toProxiedItems(
             value,
+            target,
             proxy,
             cache,
             cacheParents,
-            onChange
+            onChange,
+            false,
           ) : value;
       }
   }

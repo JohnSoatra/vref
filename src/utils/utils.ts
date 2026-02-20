@@ -107,10 +107,12 @@ export function toRawArgs(args: any[]) {
 
 export function toProxiedItems(
   array: any[],
+  target: any[],
   parent: object | undefined,
   cache: CacheProxy,
   cacheParents: CacheParentsProxy,
-  onChange: OnChangeHandler
+  onChange: OnChangeHandler,
+  saveProxy?: boolean,
 ) {
   return array.map(each => createProxyTry(
     each,
@@ -118,7 +120,7 @@ export function toProxiedItems(
     cache,
     cacheParents,
     onChange,
-    false
+    saveProxy ?? target.includes(each),
   ));
 }
 
@@ -126,7 +128,7 @@ export function toProxiedItems(
  * Wraps callback functions passed to array/map/set iteration methods
  * to ensure reactive proxy values are passed to the original callback.
  */
-export function createCallbackArgs<T extends any[] | Map<any ,any> | Set<any>>(
+export function createCallbackArgs<T extends any[] | Map<any, any> | Set<any>>(
   target: T,
   parent: object | undefined,
   cache: CacheProxy,
@@ -145,7 +147,6 @@ export function createCallbackArgs<T extends any[] | Map<any ,any> | Set<any>>(
           cache,
           cacheParents,
           onChange,
-          false,
         );
       });
       return callbackFn.apply(this, proxiedArgs);
@@ -167,13 +168,14 @@ export function reduceCallbackArgs(
   function callback(this: any, ...callbackArgs: any[]) {
     const proxiedArgs = callbackArgs.map((arg, index) => {
       const directParent = target === arg ? undefined : parent;
+      const targetItem = target.includes(arg);
       return index > 0 ? createProxyTry(
         arg,
         directParent,
         cache,
         cacheParents,
         onChange,
-        false,
+        targetItem,
       ) : arg
     });
     return callbackFn.apply(this, proxiedArgs);

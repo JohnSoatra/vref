@@ -24,11 +24,14 @@ export default function producerArrayHandler<T extends any[]>(
   const proxy = cache.get(this);
   const rawArgs = proxy ? toRawArgs(args) : args;
   const value = target[key].apply(this, rawArgs);
+  const autoSave = key === 'slice' || key === 'toReversed' || undefined;
   return proxy ? toProxiedItems(
     value,
+    target,
     proxy,
     cache,
     cacheParents,
-    onChange
+    onChange,
+    autoSave,
   ) : value;
 }
