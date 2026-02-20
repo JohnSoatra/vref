@@ -7,11 +7,11 @@ A Tiny Reactive library to track and respond to changes in variables, providing 
 ### Usage
 
 ```ts
-import ref from 'vref';
+import ref from "vref";
 
 // Primitive value
 const count = ref(0, (evt) => {
-  console.log('Changed:', evt.value);
+  console.log("Changed:", evt.value);
 });
 
 count.value = 1;
@@ -20,12 +20,14 @@ count.value++;
 console.log(count.value); // 2
 
 // Object value
-const user = ref({ name: 'John', age: 25 }, (evt) => {
-  console.log('Changed:', evt);
+const { value: user } = ref({ name: "John", age: 25 }, (evt) => {
+  console.log("Changed:", evt);
 });
 
-user.value.age = 26;     // triggers onchange
-user.value.name = 'Doe'; // triggers onchange
+user.name = "Doe"; // triggers onchange
+user.age += 1; // triggers onchange
+
+console.log(user); // { name: "Doe", age: 26 }
 ```
 
 ---
