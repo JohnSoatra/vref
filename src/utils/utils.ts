@@ -167,16 +167,19 @@ export function reduceCallbackArgs(
   const [callbackFn, ...restArgs] = args;
   function callback(this: any, ...callbackArgs: any[]) {
     const proxiedArgs = callbackArgs.map((arg, index) => {
-      const directParent = target === arg ? undefined : parent;
-      const targetItem = target.includes(arg);
-      return index > 0 ? createProxyTry(
-        arg,
-        directParent,
-        cache,
-        cacheParents,
-        onChange,
-        targetItem,
-      ) : arg
+      if (index > 0) {
+        const directParent = target === arg ? undefined : parent;
+        const targetItem = target.includes(arg);
+        return createProxyTry(
+          arg,
+          directParent,
+          cache,
+          cacheParents,
+          onChange,
+          targetItem,
+        );
+      }
+      return arg;
     });
     return callbackFn.apply(this, proxiedArgs);
   }
